@@ -1,0 +1,11 @@
+# Local source data and generated files
+/data/raw/
+/database/
+/exports/
+
+# Database files and temporary files
+*.duckdb
+*.duckdb.wal
+*.tmp
+~$*
+.dbeaver/
