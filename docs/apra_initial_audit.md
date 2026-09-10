@@ -18,7 +18,7 @@ The sheet names `Notes ` and `Explanatory notes ` have a trailing space. The sou
 
 Open [01_audit_existing_tables.sql](../sql/01_audit_existing_tables.sql) in DBeaver and execute its statements using the project's DuckDB connection. The script requires the existing `raw.apra_madis` and `core.dim_bank` tables. It performs read-only queries and does not create or alter tables.
 
-The results below were observed in the project database. The source workbook was also inspected read-only: its row count, date coverage and the first five institution/ABN/loan/deposit samples agreed with the database results. This is not a full cell-by-cell reconciliation.
+The results below were observed in the project database. At this initial checkpoint, the source workbook was also inspected read-only: its row count, date coverage and the first five institution/ABN/loan/deposit samples agreed with the database results. A later comparison of every raw field is recorded in the follow-up section below.
 
 ## Table structure and record counts
 
@@ -83,13 +83,17 @@ Whitespace-only strings and NULLs are treated as missing for the audit. Nonblank
 
 In total, 2,492 selected measure values were checked. Zero and negative counts are diagnostic flags, not automatic rules for deleting or replacing data. No source values were changed by these queries.
 
-## Boundaries and next steps
+## Follow-up: input reconstruction confirmed on 2026-09-11
 
-This audit covers the dates in the imported APRA MADIS table and the seven selected amounts for the four mapped banks. It does not validate every financial field, other institutions' amounts, the remaining five workbooks, or the economic meaning of future analysis.
+The [rebuild guide](rebuild_apra.md) records a subsequent comparison of the Excel snapshot with the existing raw table using `EXCEPT ALL` in both directions. Both sides contained 11,122 rows; both differences were zero across all 30 columns. The four scripted bank mappings also matched the existing table across all three mapping fields, with zero differences.
 
-Next steps:
+The [typed staging table](apra_staging.md) has been created and validated. Input setup, audit and staging scripts have also been run in an independent database directly from the Excel source.
 
-1. Build a typed staging table, keeping ABNs as text, report dates as `DATE`, and financial measures in AUD million. Check the resulting bank/month keys and retained row counts.
-2. Capture source-loading and bank-mapping creation scripts so the database can be rebuilt from the local source files. The current audit script alone does not rebuild it.
-3. Validate and integrate the other APRA, RBA and ABS sources, documenting frequency and scope differences.
-4. Develop analytical SQL, the Power BI model and report, and the final portfolio findings.
+## Boundaries and remaining work
+
+The initial date and numeric checks cover the imported APRA MADIS dates and seven selected amounts for the four mapped banks. The later source comparison verifies faithful reproduction of all raw values. It does not extend the numeric and business-rule checks to every financial field or institution, validate the remaining five workbooks, or establish the economic meaning of future analysis.
+
+Remaining steps:
+
+1. Validate and integrate the other APRA, RBA and ABS sources, documenting frequency and scope differences.
+2. Develop analytical SQL, the Power BI model and report, and the final portfolio findings.

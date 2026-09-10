@@ -62,10 +62,12 @@ The bank/month key is unique in the observed data; a primary-key constraint has 
 
 Before execution in the project database, the same creation script was also tested in an independent in-memory DuckDB database using an extraction of the source workbook. That test confirmed 89 records per bank, compared all 2,492 generated amount values with the corresponding source-extraction fields, and verified that malformed amount text was rejected. This independent test is supplementary evidence, not a full reconciliation of every field in the project's raw table.
 
+A later [source-rebuild comparison](rebuild_apra.md), confirmed on 2026-09-11, matched all 11,122 raw rows across 30 columns and all four bank mappings against the existing project inputs. The setup, audit and staging scripts were also tested together in a separate database reading directly from the source Excel workbook.
+
 ## Execution and remaining work
 
 - Run the creation section once after preparing the two input tables and completing the initial audit. If the target table already exists, `CREATE TABLE` reports an error without replacing it.
 - Sections 3-5 of the script are read-only checks and can be rerun against the existing table.
 - The table is a stored snapshot. Changes to the source tables do not automatically refresh it; a controlled refresh process remains to be added.
-- Raw-data loading and bank-mapping creation scripts still need to be captured and verified in a separate database before the repository can rebuild the project from its source files.
+- Raw-data loading and bank-mapping creation are now captured in [setup/01_create_apra_inputs.sql](../sql/setup/01_create_apra_inputs.sql). Follow the [rebuild guide](rebuild_apra.md) to reconstruct the APRA inputs and staging table in a separate empty database.
 - Validation of the remaining workbooks, analytical modelling and Power BI reporting are subsequent phases.
