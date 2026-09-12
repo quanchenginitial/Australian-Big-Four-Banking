@@ -5,10 +5,11 @@ Australian Big Four banking data alongside interest rates and inflation.
 
 ## Status
 
-Work in progress. Four of the six source workbooks have been imported: the two
-APRA sources, RBA F1.1 and ABS monthly CPI Table 1. Their selected measures have
-been audited and converted into typed staging tables, with project results
-confirmed through DBeaver on 2026-09-11.
+Work in progress. Five of the six source workbooks have been imported: the two
+APRA sources, RBA F1.1, ABS monthly CPI Table 1 and quarterly CPI Table 17.
+Their selected measures have been audited and converted into typed staging
+tables, with project results confirmed through DBeaver on 2026-09-11 and
+2026-09-13.
 The source-loading and transformation scripts have also passed independent
 DuckDB tests against the downloaded Excel snapshots.
 
@@ -18,6 +19,7 @@ DuckDB tests against the downloaded Excel snapshots.
 | `stg.apra_big_four_quarterly` | 212 | Four banks, 53 quarters, March 2013-March 2026 | Four capital/RWA amounts and six capital/liquidity ratios |
 | `stg.rba_monthly_rates` | 687 | One market-wide observation per month, June 1969-August 2026 | Cash-rate target, interbank overnight cash rate and three-month bank-bill rate |
 | `stg.abs_cpi_australia_monthly` | 28 | Australia, April 2024-July 2026 | All groups CPI index and published annual/monthly percentage changes, Original series |
+| `stg.abs_cpi_australia_quarterly` | 312 | Australia, 1948Q3-2026Q2 | All groups CPI index and published quarterly percentage change, Original series |
 
 The MADIS monthly table has no duplicate bank/month keys, missing keys or missing
 selected amounts. A separate source comparison matched all 11,122 MADIS raw
@@ -43,7 +45,7 @@ November 1969. All three rates have complete, nonzero coverage for the APRA
 analysis inputs: 89 MADIS months and all 159 months of the 53 ADI quarters.
 The rates are monthly averages; quarterly aggregation has not yet been built.
 
-The Australia CPI table has one DATE and three DECIMAL(18,6) columns, with all
+The Australia monthly CPI table has one DATE and three DECIMAL(18,6) columns, with all
 twelve staging checks passing. Source first-day month labels are converted to
 month-end reporting labels. The table preserves 12 early annual-change NULLs,
 one initial monthly-change NULL, seven negative monthly changes and three zero
@@ -52,8 +54,19 @@ months of the ADI quarters; earlier monthly CPI data remains unavailable.
 The full raw import retains all 27 series for Australia and eight capital cities;
 the numeric audit and staging select the three Australia measures.
 
-Next: import and validate the two ABS quarterly CPI workbooks, starting with
-Table 17, before developing the analytical model and Power BI report.
+The Australia quarterly CPI table has one DATE and two DECIMAL(18,6) columns,
+with all ten staging checks passing. It retains 312 consecutive quarters,
+1948-09-30 through 2026-06-30. Source labels use day 1 of the quarter's final
+month; staging converts them to the corresponding quarter ends. The published
+quarterly change retains one initial NULL, twelve negative values and
+twenty-four zeros. Both selected measures cover all 53 ADI quarters,
+2013Q1-2026Q1, without missing numeric values. The raw import preserves all
+18 Australia/city series; the numeric audit and staging select Australia.
+Table 17 has no published annual-change column, and no YoY measure is derived
+in this step. Quarterly observations do not fill the monthly CPI history gaps.
+
+Next: import and validate ABS quarterly CPI Table 18, the final source workbook,
+before developing the analytical model and Power BI report.
 
 ## Tools
 
@@ -72,6 +85,7 @@ The completed imports use these pinned snapshots:
 - `02_APRA_ADI_Capital_Liquidity_Mar2013_Mar2026.xlsx`: Table 4, range A3:W5298; 5,295 raw rows and 23 columns.
 - `03_RBA_F1_1_Monthly_Money_Market.xlsx`: Data, range A11:P698; 687 raw rows and 16 columns (a date column and 15 series). The selected staging table keeps three rates and all months.
 - `04_ABS_CPI_Table1_Monthly_Jul2026.xlsx`: Data1, range A10:AB38; 28 raw rows and 28 columns (a date column and 27 series). The selected staging table keeps three Australia measures and all months.
+- `05_ABS_CPI_Table17_Quarterly_Jul2026.xlsx`: Data1, range A10:S322; 312 raw rows and 19 columns (a date column and 18 series). The selected staging table keeps two Australia measures and all quarters.
 
 APRA monetary amounts remain in millions of Australian dollars. ADI ratios retain
 decimal fractions, so `0.124` represents 12.4% and `1.318` represents 131.8%.
@@ -79,9 +93,10 @@ Missing liquidity observations remain NULL. RBA rates retain per-cent units
 in `_pct` columns: `4.35` means 4.35%. CPI change columns also retain per-cent
 units: `3.5` means 3.5%. Divide these `_pct` values by 100 once if a reporting
 field requires a decimal fraction. The CPI index has its own scale,
-September 2025 = 100.00, and is not a percentage. Source definitions and coverage
-are documented below. Validation of the two remaining quarterly CPI workbooks
-is pending.
+September MONTH 2025 = 100.00, and is not a percentage. September QUARTER 2025
+retains index 99.73 in Table 17. Published changes are preserved rather than
+recalculated from rounded indexes. Source definitions, reference-period changes
+and coverage are documented below. Validation of Table 18 remains pending.
 
 ## SQL scripts
 
@@ -98,23 +113,28 @@ is pending.
 - [09_create_rba_monthly_staging.sql](sql/09_create_rba_monthly_staging.sql): create the typed monthly reference-rate table and check its retained history, missing values and historical source zero.
 - [10_load_abs_cpi_monthly.sql](sql/10_load_abs_cpi_monthly.sql): import all 27 monthly CPI series and inspect raw types, dates and five Australia samples.
 - [11_audit_abs_cpi_monthly.sql](sql/11_audit_abs_cpi_monthly.sql): audit source month labels, three Australia measures, missing-value positions and available months within the APRA periods.
-- [12_create_abs_cpi_monthly_staging.sql](sql/12_create_abs_cpi_monthly_staging.sql): create the typed Australia CPI table, align dates to month ends and validate twelve snapshot expectations.
+- [12_create_abs_cpi_monthly_staging.sql](sql/12_create_abs_cpi_monthly_staging.sql): create the typed Australia monthly CPI table, align dates to month ends and validate twelve snapshot expectations.
+- [13_load_abs_cpi_quarterly.sql](sql/13_load_abs_cpi_quarterly.sql): import all 18 quarterly CPI series and inspect raw types, dates and five Australia samples.
+- [14_audit_abs_cpi_quarterly.sql](sql/14_audit_abs_cpi_quarterly.sql): audit source quarter labels, Australia index/QoQ measures, missing-value positions and ADI quarterly coverage.
+- [15_create_abs_cpi_quarterly_staging.sql](sql/15_create_abs_cpi_quarterly_staging.sql): create the typed Australia quarterly CPI table, align dates to quarter ends and validate ten snapshot expectations.
 
 ## Rebuild the completed data modules
 
 Start with the [APRA rebuild guide](docs/rebuild_apra.md) in a separate empty
 DuckDB database, then continue with the [RBA rebuild guide](docs/rebuild_rba.md)
-and [ABS monthly CPI rebuild guide](docs/rebuild_abs_cpi.md) on the same
-connection. Use the four downloaded workbooks and adjust the source paths as
+and [ABS CPI rebuild guide](docs/rebuild_abs_cpi.md) on the same
+connection. Use the five downloaded workbooks and adjust the source paths as
 instructed. The modules were tested with DuckDB v1.5.5 and its official Excel
 extension. Both macro modules' APRA-period coverage queries require the two APRA
 staging tables to exist first.
 
 The guides create `raw.apra_madis`, `raw.apra_adi_quarterly`,
-`raw.rba_f1_1_monthly`, `raw.abs_cpi_table1_monthly`, `core.dim_bank`,
+`raw.rba_f1_1_monthly`, `raw.abs_cpi_table1_monthly`,
+`raw.abs_cpi_table17_quarterly`, `core.dim_bank`,
 `stg.apra_big_four_monthly`, `stg.apra_big_four_quarterly`,
-`stg.rba_monthly_rates` and `stg.abs_cpi_australia_monthly`. The two quarterly
-CPI workbooks and the Power BI report are outside this completed step.
+`stg.rba_monthly_rates`, `stg.abs_cpi_australia_monthly` and
+`stg.abs_cpi_australia_quarterly`. CPI Table 18 and the Power BI report are
+outside this completed step.
 The staging tables are stored snapshots; an automatic refresh process has not
 yet been implemented.
 
@@ -130,4 +150,6 @@ yet been implemented.
 - [RBA rebuild guide](docs/rebuild_rba.md): prerequisites, execution order and expected results for rebuilding the monthly rate module after APRA.
 - [ABS monthly CPI source review](docs/abs_cpi_monthly_source_review.md): source layout, series register, units and confirmed import/audit results.
 - [Australia monthly CPI staging table](docs/abs_cpi_monthly_staging.md): four-column dictionary, month-end conversion and twelve confirmed staging checks.
-- [ABS monthly CPI rebuild guide](docs/rebuild_abs_cpi.md): prerequisites, execution order and expected results for the monthly CPI module.
+- [ABS quarterly CPI source review](docs/abs_cpi_quarterly_source_review.md): Table 17 layout, series IDs, index reference basis and confirmed date/metric/coverage audit.
+- [Australia quarterly CPI staging table](docs/abs_cpi_quarterly_staging.md): three-column dictionary, quarter-end conversion and ten confirmed staging checks.
+- [ABS CPI rebuild guide](docs/rebuild_abs_cpi.md): prerequisites, execution order and expected results for the monthly Table 1 and quarterly Table 17 modules.
