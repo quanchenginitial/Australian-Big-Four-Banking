@@ -10,7 +10,9 @@ from the two APRA sources, RBA F1.1, ABS monthly CPI Table 1 and quarterly CPI
 Table 17 have been audited and converted into typed staging tables. The final
 source, ABS quarterly CPI Table 18, retains all 396 audited series in a typed
 detail table. Project results were confirmed through DBeaver on 2026-09-11 and
-2026-09-13. Analytical modelling and the Power BI report remain to be built.
+2026-09-13. The SQL analysis model is also complete: a shared daily date
+dimension and four monthly/quarterly facts have passed individual and integrated
+checks. Power BI import, relationships, DAX and report pages remain to be built.
 The source-loading and transformation scripts have also passed independent
 DuckDB tests against the downloaded Excel snapshots.
 
@@ -45,7 +47,8 @@ eleven staging checks passing. It retains 254 early missing cash-rate targets,
 83 early missing interbank rates and one flagged source bank-bill zero from
 November 1969. All three rates have complete, nonzero coverage for the APRA
 analysis inputs: 89 MADIS months and all 159 months of the 53 ADI quarters.
-The rates are monthly averages; quarterly aggregation has not yet been built.
+The rates are monthly averages. The quarterly macro fact now derives guarded,
+equal-weight means of the three monthly averages in each required quarter.
 
 The Australia monthly CPI table has one DATE and three DECIMAL(18,6) columns, with all
 twelve staging checks passing. Source first-day month labels are converted to
@@ -83,8 +86,48 @@ series-quarter cells and 6,732 unavailable cells. These blanks remain NULL.
 Contributions use Index Points; they are not inflation rates or percentage weights.
 Reporting categories and their hierarchy have not yet been selected or mapped.
 
-Next: define analysis periods, date alignment and reporting measures, then build
-the analytical model and Power BI report.
+## Validated SQL analysis model
+
+The initial model reuses `core.dim_bank` and adds the five tables below.
+Bank facts retain their complete audited histories, while each macro fact uses
+the distinct dates required by the corresponding bank fact. Staging histories
+remain unchanged.
+
+| Model table | Grain | Records | Coverage |
+|---|---|---:|---|
+| `core.dim_bank` | One bank | 4 | ANZ, CBA, NAB, WBC |
+| `core.dim_date` | One calendar day | 5,113 | 2013-01-01 to 2026-12-31 |
+| `mart.fact_bank_monthly` | One bank and month end | 356 | 2019-03-31 to 2026-07-31 |
+| `mart.fact_bank_quarterly` | One bank and quarter end | 212 | 2013-03-31 to 2026-03-31 |
+| `mart.fact_macro_monthly` | One month end shared by all banks | 89 | 2019-03-31 to 2026-07-31 |
+| `mart.fact_macro_quarterly` | One quarter end shared by all banks | 53 | 2013-03-31 to 2026-03-31 |
+
+Both bank facts preserve the selected staging values and enforce a composite
+bank/date primary key. Macro facts have a date primary key and no bank key.
+The monthly macro fact retains CPI index/YoY/MoM missing counts of 61/73/62;
+those missing measures do not remove bank months. All 265 quarterly macro
+measure values are populated in the selected window. Its three rate means
+allow NULL for incomplete inputs, which are separately flagged by validation.
+The quarterly means are project-derived averages of three monthly averages,
+not official RBA quarterly observations or quarter-end spot rates. Quarterly
+CPI retains the published Table 17 index and QoQ.
+
+All schemas, histories, individual integrity checks and full-record comparisons
+passed in the project. Integrated acceptance on 2026-09-13 confirmed six table
+inventories, six dimension relationships and two combined trial joins: monthly
+bank records remained 356 and quarterly records 212, with no unmatched rows or
+duplicate bank-period groups. Independent in-memory tests also checked source
+values, calendar attributes, quarterly rate arithmetic and temporary faults.
+
+The intended Power BI model uses single-direction dimension-to-fact filtering:
+the date dimension filters all four facts, and the bank dimension filters the
+two bank facts. These relationships have been checked in SQL and still need to
+be configured and tested in Power BI. See the [model plan and diagram](docs/analysis_model_plan.md)
+and [integrated validation results](docs/model_validation.md).
+
+Next: import the model into Power BI, configure its relationships and date
+table, then define and validate reporting measures and build report pages.
+Table 18 expenditure detail remains a later extension with its own series grain.
 
 ## Tools
 
@@ -142,13 +185,21 @@ groups, subgroups and expenditure classes.
 - [16_load_abs_cpi_quarterly_detail.sql](sql/16_load_abs_cpi_quarterly_detail.sql): import both Table 18 sheets, preserve all series and inspect their schemas, calendars and latest All groups observations.
 - [17_audit_abs_cpi_quarterly_detail.sql](sql/17_audit_abs_cpi_quarterly_detail.sql): audit both calendars and all 396 series, reconcile the headline measures with Table 17 and describe ADI-period coverage.
 - [18_create_abs_cpi_quarterly_detail_staging.sql](sql/18_create_abs_cpi_quarterly_detail_staging.sql): create the complete typed series-quarter table with source metadata, validate fifteen expectations and compare every typed raw observation with staging in both directions.
+- [19_check_model_joins.sql](sql/19_check_model_joins.sql): check all six staging grains and trial monthly/quarterly alignment, including guarded quarterly rate inputs.
+- [20_create_date_dimension.sql](sql/20_create_date_dimension.sql): create the shared 2013-2026 daily calendar, validate its attributes and confirm model date coverage.
+- [21_create_fact_bank_monthly.sql](sql/21_create_fact_bank_monthly.sql): create the monthly bank fact, check its grain and dimension references, and reconcile all retained amounts.
+- [22_create_fact_bank_quarterly.sql](sql/22_create_fact_bank_quarterly.sql): create the quarterly bank fact with source liquidity NULLs and framework labels, then validate and reconcile every field.
+- [23_create_fact_macro_monthly.sql](sql/23_create_fact_macro_monthly.sql): retain one macro row per required bank month, preserving CPI missing-value patterns and reconciling source values.
+- [24_create_fact_macro_quarterly.sql](sql/24_create_fact_macro_quarterly.sql): derive guarded RBA quarterly means and retain published CPI for the 53 bank quarters, with completeness and full-record checks.
+- [25_validate_analysis_model.sql](sql/25_validate_analysis_model.sql): validate all six model inventories, six dimension relationships and combined monthly/quarterly trial joins.
 
-## Rebuild the completed data modules
+## Rebuild the data modules and SQL model
 
 Start with the [APRA rebuild guide](docs/rebuild_apra.md) in a separate empty
 DuckDB database, then continue with the [RBA rebuild guide](docs/rebuild_rba.md)
 and [ABS CPI rebuild guide](docs/rebuild_abs_cpi.md) on the same
-connection. Use the six downloaded workbooks and adjust the source paths as
+connection. Continue with the [analysis model rebuild guide](docs/rebuild_analysis_model.md)
+to execute scripts 19-25 in order. Use the six downloaded workbooks and adjust the source paths as
 instructed. The modules were tested with DuckDB v1.5.5 and its official Excel
 extension. Both macro modules' APRA-period coverage queries require the two APRA
 staging tables to exist first. The Table 18 audit also requires the Table 17
@@ -161,10 +212,11 @@ The guides create `raw.apra_madis`, `raw.apra_adi_quarterly`,
 `stg.apra_big_four_monthly`, `stg.apra_big_four_quarterly`,
 `stg.rba_monthly_rates`, `stg.abs_cpi_australia_monthly`,
 `stg.abs_cpi_australia_quarterly` and `stg.abs_cpi_australia_quarterly_detail`.
-Analytical facts, further dimensions and the Power BI report are outside this
-completed data-preparation stage.
-The staging tables are stored snapshots; an automatic refresh process has not
-yet been implemented.
+The model guide adds `core.dim_date` and the four `mart.fact_*` tables listed
+above, reusing `core.dim_bank`. Creation and insertion statements run once in
+the rebuild database; diagnostics are repeatable. The Power BI report is outside
+this SQL rebuild. Staging and facts are stored snapshots; an automatic refresh
+process has not yet been implemented.
 
 ## Documentation
 
@@ -183,3 +235,11 @@ yet been implemented.
 - [ABS quarterly CPI detail source review](docs/abs_cpi_quarterly_detail_source_review.md): both Table 18 sheets, all-series metadata and coverage, and confirmed audit and Table 17 reconciliation results.
 - [Australia quarterly CPI detail staging table](docs/abs_cpi_quarterly_detail_staging.md): seven-column dictionary, preserved series and missing observations, fifteen confirmed checks and two complete source comparisons.
 - [ABS CPI rebuild guide](docs/rebuild_abs_cpi.md): prerequisites, execution order and expected results for monthly Table 1, quarterly Table 17 and quarterly detail Table 18.
+- [Analysis model plan](docs/analysis_model_plan.md): grains, periods, reporting scopes, units, quarterly rate definition and intended relationship diagram.
+- [Date dimension](docs/date_dimension.md): thirteen-field dictionary, calendar generation, period labels and confirmed date-coverage checks.
+- [Monthly bank fact](docs/fact_bank_monthly.md): nine-field dictionary, amount scope, keys and confirmed source comparisons.
+- [Quarterly bank fact](docs/fact_bank_quarterly.md): fourteen-field dictionary, retained liquidity NULLs, framework labels and confirmed source comparisons.
+- [Monthly macro fact](docs/fact_macro_monthly.md): seven-field dictionary, bank-month alignment and preserved CPI availability.
+- [Quarterly macro fact](docs/fact_macro_quarterly.md): six-field dictionary, guarded means, published quarterly CPI and confirmed completeness/value checks.
+- [Integrated model validation](docs/model_validation.md): six-table acceptance, dimension relationships, combined trial joins and observed fault detection.
+- [Analysis model rebuild guide](docs/rebuild_analysis_model.md): source prerequisites, scripts 19-25, expected outputs and snapshot-refresh boundaries.
