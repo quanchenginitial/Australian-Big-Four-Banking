@@ -1,0 +1,15 @@
+// Read the three calendar labels' actual Sort by column properties.
+// Expected: month_name -> month_number; year_month -> year_month_sort;
+// year_quarter -> year_quarter_sort.
+// A blank SortByColumn means the column sorts by itself.
+EVALUATE
+SELECTCOLUMNS (
+    FILTER (
+        INFO.VIEW.COLUMNS (),
+        [Table] = "dim_date"
+            && [Name] IN {"month_name", "year_month", "year_quarter"}
+    ),
+    "column_name", [Name],
+    "sort_by_column", [SortByColumn]
+)
+ORDER BY [column_name]

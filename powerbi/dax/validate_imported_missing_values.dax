@@ -1,0 +1,43 @@
+// Compare six known missing-value counts with the validated DuckDB snapshot.
+// Run as a read-only query in Power BI Desktop's DAX query view.
+// COUNTBLANK does not count numeric zero as a missing value.
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "cpi_index_missing",
+            "actual_count", COUNTBLANK ('fact_macro_monthly'[cpi_index]),
+            "expected_count", 61
+        ),
+        ROW (
+            "check_name", "cpi_yoy_missing",
+            "actual_count", COUNTBLANK ('fact_macro_monthly'[cpi_yoy_pct]),
+            "expected_count", 73
+        ),
+        ROW (
+            "check_name", "cpi_mom_missing",
+            "actual_count", COUNTBLANK ('fact_macro_monthly'[cpi_mom_pct]),
+            "expected_count", 62
+        ),
+        ROW (
+            "check_name", "lcr_ratio_missing",
+            "actual_count", COUNTBLANK ('fact_bank_quarterly'[lcr_ratio]),
+            "expected_count", 80
+        ),
+        ROW (
+            "check_name", "nsfr_ratio_missing",
+            "actual_count", COUNTBLANK ('fact_bank_quarterly'[nsfr_ratio]),
+            "expected_count", 80
+        ),
+        ROW (
+            "check_name", "mlh_ratio_missing",
+            "actual_count", COUNTBLANK ('fact_bank_quarterly'[mlh_ratio]),
+            "expected_count", 212
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "status", IF ([actual_count] = [expected_count], "PASS", "FAIL")
+    )
+ORDER BY [check_name]

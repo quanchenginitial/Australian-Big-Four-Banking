@@ -1,0 +1,50 @@
+// Project-derived ratio within the APRA MADIS domestic, resident scope.
+// Ratio of aggregate loans to aggregate deposits at the selected latest month.
+// Store as a fraction; use percentage format 0.00% for presentation.
+// Requires the existing Total Loans and Total Deposits model measures.
+DEFINE
+    MEASURE 'fact_bank_monthly'[Loan-to-Deposit Ratio (%)] =
+        DIVIDE (
+            [Total Loans (AUD bn)],
+            [Total Deposits (AUD bn)]
+        )
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "all_banks_latest",
+            "actual_value", [Loan-to-Deposit Ratio (%)],
+            "expected_value", 2953.2491 / 2552.4870
+        ),
+        ROW (
+            "check_name", "anz_latest",
+            "actual_value", CALCULATE (
+                [Loan-to-Deposit Ratio (%)],
+                'dim_bank'[bank_code] = "ANZ"
+            ),
+            "expected_value", 529.0144 / 438.3057
+        ),
+        ROW (
+            "check_name", "all_banks_2026_06",
+            "actual_value", CALCULATE (
+                [Loan-to-Deposit Ratio (%)],
+                'dim_date'[year_month] = "2026-06"
+            ),
+            "expected_value", 2940.4464 / 2531.6121
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "actual_pct", FORMAT ([actual_value], "0.00%"),
+        "expected_pct", FORMAT ([expected_value], "0.00%"),
+        "status",
+            IF (
+                NOT ISBLANK ([actual_value])
+                    && ABS ([actual_value] - [expected_value]) < 0.0000000001,
+                "PASS",
+                "FAIL"
+            )
+    )
+ORDER BY [check_name]

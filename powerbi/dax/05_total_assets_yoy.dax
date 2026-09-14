@@ -1,0 +1,96 @@
+// APRA MADIS domestic, Australian-resident assets: same-month annual growth.
+// Requires the existing Total Assets (AUD bn) model measure.
+// Keep the result numeric; use 0.00% when formatting the measure/card.
+// Expected values are independently calculated from the fixed source snapshot.
+DEFINE
+    MEASURE 'fact_bank_monthly'[Total Assets YoY (%)] =
+        VAR CurrentReportDate =
+            MAX ('fact_bank_monthly'[report_date])
+        RETURN
+            IF (
+                ISBLANK (CurrentReportDate),
+                BLANK (),
+                VAR PriorReportDate =
+                    EOMONTH (CurrentReportDate, -12)
+                VAR CurrentAssets =
+                    [Total Assets (AUD bn)]
+                VAR PriorAssets =
+                    CALCULATE (
+                        [Total Assets (AUD bn)],
+                        REMOVEFILTERS ('dim_date'),
+                        REMOVEFILTERS ('fact_bank_monthly'[report_date]),
+                        'dim_date'[calendar_date] = PriorReportDate
+                    )
+                RETURN
+                    IF (
+                        ISBLANK (CurrentAssets) || ISBLANK (PriorAssets),
+                        BLANK (),
+                        DIVIDE (CurrentAssets - PriorAssets, PriorAssets)
+                    )
+            )
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "all_banks_latest",
+            "actual_value", [Total Assets YoY (%)],
+            "expected_value", (4209.3537 - 3976.5102) / 3976.5102
+        ),
+        ROW (
+            "check_name", "anz_latest",
+            "actual_value", CALCULATE (
+                [Total Assets YoY (%)],
+                'dim_bank'[bank_code] = "ANZ"
+            ),
+            "expected_value", (780.9121 - 754.3989) / 754.3989
+        ),
+        ROW (
+            "check_name", "all_banks_2026_06",
+            "actual_value", CALCULATE (
+                [Total Assets YoY (%)],
+                'dim_date'[year_month] = "2026-06"
+            ),
+            "expected_value", (4199.5214 - 3978.7855) / 3978.7855
+        ),
+        ROW (
+            "check_name", "all_banks_2021_02",
+            "actual_value", CALCULATE (
+                [Total Assets YoY (%)],
+                'dim_date'[year_month] = "2021-02"
+            ),
+            // February 2021 compares with February 29, 2020.
+            "expected_value", (3286.0326 - 3071.4576) / 3071.4576
+        ),
+        ROW (
+            "check_name", "all_banks_2019_03_blank",
+            "actual_value", CALCULATE (
+                [Total Assets YoY (%)],
+                'dim_date'[year_month] = "2019-03"
+            ),
+            // The source has no March 2018 observation.
+            "expected_value", BLANK ()
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "actual_pct", IF (
+            ISBLANK ([actual_value]), "BLANK", FORMAT ([actual_value], "0.00%")
+        ),
+        "expected_pct", IF (
+            ISBLANK ([expected_value]), "BLANK", FORMAT ([expected_value], "0.00%")
+        ),
+        "status",
+            IF (
+                ISBLANK ([expected_value]),
+                IF (ISBLANK ([actual_value]), "PASS", "FAIL"),
+                IF (
+                    NOT ISBLANK ([actual_value])
+                        && ABS ([actual_value] - [expected_value]) < 0.0000000001,
+                    "PASS",
+                    "FAIL"
+                )
+            )
+    )
+ORDER BY [check_name]

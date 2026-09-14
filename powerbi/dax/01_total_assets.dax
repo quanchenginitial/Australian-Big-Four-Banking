@@ -1,0 +1,54 @@
+// APRA MADIS domestic, unconsolidated Australian-resident scope.
+// Evaluate the measure and three fixed-snapshot checks first.
+// After all checks pass, use Update model with changes to persist the measure.
+DEFINE
+    MEASURE 'fact_bank_monthly'[Total Assets (AUD bn)] =
+        VAR LatestReportDate =
+            MAX ('fact_bank_monthly'[report_date])
+        VAR AssetsAtLatestDate =
+            CALCULATE (
+                SUM ('fact_bank_monthly'[assets_million]),
+                KEEPFILTERS (
+                    'fact_bank_monthly'[report_date] = LatestReportDate
+                )
+            )
+        RETURN
+            DIVIDE (AssetsAtLatestDate, 1000)
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "all_banks_latest",
+            "actual_value", [Total Assets (AUD bn)],
+            "expected_value", 4209.3537
+        ),
+        ROW (
+            "check_name", "anz_latest",
+            "actual_value", CALCULATE (
+                [Total Assets (AUD bn)],
+                'dim_bank'[bank_code] = "ANZ"
+            ),
+            "expected_value", 780.9121
+        ),
+        ROW (
+            "check_name", "all_banks_2026_06",
+            "actual_value", CALCULATE (
+                [Total Assets (AUD bn)],
+                'dim_date'[year_month] = "2026-06"
+            ),
+            "expected_value", 4199.5214
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "status",
+            IF (
+                NOT ISBLANK ([actual_value])
+                    && ABS ([actual_value] - [expected_value]) < 0.00000001,
+                "PASS",
+                "FAIL"
+            )
+    )
+ORDER BY [check_name]

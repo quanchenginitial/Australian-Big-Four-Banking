@@ -1,0 +1,54 @@
+// APRA MADIS domestic, unconsolidated Australian-resident scope.
+// Total residents loans and finance leases: a month-end balance.
+// Evaluate all three checks, then use Update model with changes.
+DEFINE
+    MEASURE 'fact_bank_monthly'[Total Loans (AUD bn)] =
+        VAR LatestReportDate =
+            MAX ('fact_bank_monthly'[report_date])
+        VAR LoansAtLatestDate =
+            CALCULATE (
+                SUM ('fact_bank_monthly'[loans_million]),
+                KEEPFILTERS (
+                    'fact_bank_monthly'[report_date] = LatestReportDate
+                )
+            )
+        RETURN
+            DIVIDE (LoansAtLatestDate, 1000)
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "all_banks_latest",
+            "actual_value", [Total Loans (AUD bn)],
+            "expected_value", 2953.2491
+        ),
+        ROW (
+            "check_name", "anz_latest",
+            "actual_value", CALCULATE (
+                [Total Loans (AUD bn)],
+                'dim_bank'[bank_code] = "ANZ"
+            ),
+            "expected_value", 529.0144
+        ),
+        ROW (
+            "check_name", "all_banks_2026_06",
+            "actual_value", CALCULATE (
+                [Total Loans (AUD bn)],
+                'dim_date'[year_month] = "2026-06"
+            ),
+            "expected_value", 2940.4464
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "status",
+            IF (
+                NOT ISBLANK ([actual_value])
+                    && ABS ([actual_value] - [expected_value]) < 0.00000001,
+                "PASS",
+                "FAIL"
+            )
+    )
+ORDER BY [check_name]

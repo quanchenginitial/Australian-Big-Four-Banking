@@ -12,7 +12,10 @@ source, ABS quarterly CPI Table 18, retains all 396 audited series in a typed
 detail table. Project results were confirmed through DBeaver on 2026-09-11 and
 2026-09-13. The SQL analysis model is also complete: a shared daily date
 dimension and four monthly/quarterly facts have passed individual and integrated
-checks. Power BI import, relationships, DAX and report pages remain to be built.
+checks. Power BI import, six active dimension relationships, calendar settings
+and five DAX measures are now validated. The first report page, Overview, is
+complete, with its final month/bank interaction checks and saving confirmed
+on 2026-09-15. Additional analysis and report pages remain in progress.
 The source-loading and transformation scripts have also passed independent
 DuckDB tests against the downloaded Excel snapshots.
 
@@ -121,13 +124,37 @@ values, calendar attributes, quarterly rate arithmetic and temporary faults.
 
 The intended Power BI model uses single-direction dimension-to-fact filtering:
 the date dimension filters all four facts, and the bank dimension filters the
-two bank facts. These relationships have been checked in SQL and still need to
-be configured and tested in Power BI. See the [model plan and diagram](docs/analysis_model_plan.md)
+two bank facts. All six relationships are now configured as active, single-direction
+one-to-many relationships in Power BI, with date marking and sort settings verified. See the [model plan and diagram](docs/analysis_model_plan.md)
 and [integrated validation results](docs/model_validation.md).
 
-Next: import the model into Power BI, configure its relationships and date
-table, then define and validate reporting measures and build report pages.
+The first Power BI page and its five measures are complete. See the
+[Overview report](docs/power_bi_overview.md) and [Power BI rebuild guide](docs/rebuild_power_bi.md).
+Further banking analysis, capital/liquidity and macro report pages remain in progress.
 Table 18 expenditure detail remains a later extension with its own series grain.
+
+## Power BI Overview
+
+![Australian Big Four Banking Overview](reports/overview.png)
+
+The first page shows monthly assets, loans, deposits, a derived loan-to-deposit
+ratio and total-assets annual growth, with bank comparisons and full-history
+trend charts. The month selector filters cards and bank comparisons; the bank
+selector also filters both history charts. The page includes source and scope notes.
+
+At July 2026 with all four banks selected, the cards show assets **AUD 4,209.35 bn**,
+loans **AUD 2,953.25 bn**, deposits **AUD 2,552.49 bn**, loan-to-deposit ratio
+**115.70%**, and asset growth from July 2025 of **5.86%**. These are resident
+balances on the MADIS domestic, unconsolidated basis, not global group totals.
+
+- [Report definitions, validation and interactions](docs/power_bi_overview.md)
+- [Rebuild the Power BI model and page](docs/rebuild_power_bi.md)
+- [Versioned DAX measures and checks](powerbi/dax/)
+- [Monthly macro Power Query source](powerbi/power-query/fact_macro_monthly.pq)
+
+The screenshot is a static report preview. The local PBIX remains under the
+ignored `exports/` directory; this checkpoint provides the screenshot, DAX and
+manual rebuild instructions rather than a hosted interactive report.
 
 ## Tools
 

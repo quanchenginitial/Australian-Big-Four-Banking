@@ -1,0 +1,43 @@
+// Run in Power BI Desktop's DAX query view.
+// Expected counts are from the validated DuckDB model at commit 9902aee.
+// This query reads the imported model and returns six validation rows.
+EVALUATE
+VAR Counts =
+    UNION (
+        ROW (
+            "table_name", "dim_bank",
+            "actual_count", COUNTROWS ('dim_bank'),
+            "expected_count", 4
+        ),
+        ROW (
+            "table_name", "dim_date",
+            "actual_count", COUNTROWS ('dim_date'),
+            "expected_count", 5113
+        ),
+        ROW (
+            "table_name", "fact_bank_monthly",
+            "actual_count", COUNTROWS ('fact_bank_monthly'),
+            "expected_count", 356
+        ),
+        ROW (
+            "table_name", "fact_bank_quarterly",
+            "actual_count", COUNTROWS ('fact_bank_quarterly'),
+            "expected_count", 212
+        ),
+        ROW (
+            "table_name", "fact_macro_monthly",
+            "actual_count", COUNTROWS ('fact_macro_monthly'),
+            "expected_count", 89
+        ),
+        ROW (
+            "table_name", "fact_macro_quarterly",
+            "actual_count", COUNTROWS ('fact_macro_quarterly'),
+            "expected_count", 53
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Counts,
+        "status", IF ([actual_count] = [expected_count], "PASS", "FAIL")
+    )
+ORDER BY [table_name]
