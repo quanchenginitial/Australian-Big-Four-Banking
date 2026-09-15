@@ -13,9 +13,10 @@ detail table. Project results were confirmed through DBeaver on 2026-09-11 and
 2026-09-13. The SQL analysis model is also complete: a shared daily date
 dimension and four monthly/quarterly facts have passed individual and integrated
 checks. Power BI import, six active dimension relationships, calendar settings
-and five DAX measures are now validated. The first report page, Overview, is
-complete, with its final month/bank interaction checks and saving confirmed
-on 2026-09-15. Additional analysis and report pages remain in progress.
+and eight DAX measures are now validated. The Overview page was accepted
+on 2026-09-15, followed by Loans & Deposits on 2026-09-16. Both pages have
+passed their final month/bank interaction and save checks. Macro and
+capital/liquidity report pages remain in progress.
 The source-loading and transformation scripts have also passed independent
 DuckDB tests against the downloaded Excel snapshots.
 
@@ -128,8 +129,10 @@ two bank facts. All six relationships are now configured as active, single-direc
 one-to-many relationships in Power BI, with date marking and sort settings verified. See the [model plan and diagram](docs/analysis_model_plan.md)
 and [integrated validation results](docs/model_validation.md).
 
-The first Power BI page and its five measures are complete. See the
-[Overview report](docs/power_bi_overview.md) and [Power BI rebuild guide](docs/rebuild_power_bi.md).
+Two Power BI pages and eight measures are complete. See the
+[Overview report](docs/power_bi_overview.md),
+[Loans & Deposits report](docs/power_bi_loans_deposits.md) and
+[Power BI rebuild guide](docs/rebuild_power_bi.md).
 Further banking analysis, capital/liquidity and macro report pages remain in progress.
 Table 18 expenditure detail remains a later extension with its own series grain.
 
@@ -155,6 +158,33 @@ balances on the MADIS domestic, unconsolidated basis, not global group totals.
 The screenshot is a static report preview. The local PBIX remains under the
 ignored `exports/` directory; this checkpoint provides the screenshot, DAX and
 manual rebuild instructions rather than a hosted interactive report.
+
+## Power BI Loans & Deposits
+
+![Australian Big Four Banking Loans and Deposits](reports/loans_deposits.png)
+
+The second page compares housing loans, loans to non-financial businesses and
+household deposits across the four banks, with corresponding history charts.
+Its three cards show **AUD 1,838.83 bn**, **AUD 892.45 bn** and
+**AUD 1,272.39 bn**, respectively, at July 2026 with All banks selected.
+
+Housing combines owner-occupied and investment housing loans. These selected
+loan categories are not an exhaustive breakdown of total loans. All amounts
+use the same MADIS domestic, unconsolidated resident scope as the Overview.
+The month selector filters cards and bank comparisons while histories retain
+March 2019 through July 2026; the bank selector filters all seven data visuals.
+
+The three additional measures each passed four snapshot checks, including an
+unavailable month returning BLANK. Final June/All and July/ANZ interactions,
+history endpoint values, restoration of July/All and saving were confirmed
+on 2026-09-16. The screenshot is a static preview; the local PBIX stays in
+the ignored `exports/` directory.
+
+- [Definitions, chart configuration and acceptance values](docs/power_bi_loans_deposits.md)
+- [Rebuild both accepted pages](docs/rebuild_power_bi.md)
+- [Housing Loans DAX and checks](powerbi/dax/06_housing_loans.dax)
+- [Business Loans DAX and checks](powerbi/dax/07_business_loans.dax)
+- [Household Deposits DAX and checks](powerbi/dax/08_household_deposits.dax)
 
 ## Tools
 
@@ -270,3 +300,6 @@ process has not yet been implemented.
 - [Quarterly macro fact](docs/fact_macro_quarterly.md): six-field dictionary, guarded means, published quarterly CPI and confirmed completeness/value checks.
 - [Integrated model validation](docs/model_validation.md): six-table acceptance, dimension relationships, combined trial joins and observed fault detection.
 - [Analysis model rebuild guide](docs/rebuild_analysis_model.md): source prerequisites, scripts 19-25, expected outputs and snapshot-refresh boundaries.
+- [Power BI Overview](docs/power_bi_overview.md): five measures, chart fields, reporting scope and accepted interactions.
+- [Power BI Loans & Deposits](docs/power_bi_loans_deposits.md): three additional measures, bank comparisons, histories and accepted interactions.
+- [Power BI rebuild guide](docs/rebuild_power_bi.md): import, model settings, eight DAX measures and both report pages.

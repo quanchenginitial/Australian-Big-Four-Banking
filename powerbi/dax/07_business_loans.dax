@@ -1,0 +1,70 @@
+// APRA MADIS domestic, unconsolidated Australian-resident scope.
+// Loans to non-financial businesses, at one month-end.
+// Independent expected values use the pinned source extract, in AUD billion.
+DEFINE
+    MEASURE 'fact_bank_monthly'[Business Loans (AUD bn)] =
+        VAR LatestReportDate =
+            MAX ('fact_bank_monthly'[report_date])
+        VAR BusinessAtLatestDate =
+            CALCULATE (
+                SUM ('fact_bank_monthly'[business_loans_million]),
+                KEEPFILTERS (
+                    'fact_bank_monthly'[report_date] = LatestReportDate
+                )
+            )
+        RETURN
+            IF (
+                ISBLANK (LatestReportDate),
+                BLANK (),
+                DIVIDE (BusinessAtLatestDate, 1000)
+            )
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "all_banks_latest",
+            "actual_value", [Business Loans (AUD bn)],
+            "expected_value", 892.4528
+        ),
+        ROW (
+            "check_name", "anz_latest",
+            "actual_value", CALCULATE (
+                [Business Loans (AUD bn)],
+                'dim_bank'[bank_code] = "ANZ"
+            ),
+            "expected_value", 157.7685
+        ),
+        ROW (
+            "check_name", "all_banks_2026_06",
+            "actual_value", CALCULATE (
+                [Business Loans (AUD bn)],
+                'dim_date'[year_month] = "2026-06"
+            ),
+            "expected_value", 885.2257
+        ),
+        ROW (
+            "check_name", "all_banks_2019_02_blank",
+            "actual_value", CALCULATE (
+                [Business Loans (AUD bn)],
+                'dim_date'[year_month] = "2019-02"
+            ),
+            "expected_value", BLANK ()
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "status",
+            IF (
+                ISBLANK ([expected_value]),
+                IF (ISBLANK ([actual_value]), "PASS", "FAIL"),
+                IF (
+                    NOT ISBLANK ([actual_value])
+                        && ABS ([actual_value] - [expected_value]) < 0.00000001,
+                    "PASS",
+                    "FAIL"
+                )
+            )
+    )
+ORDER BY [check_name]

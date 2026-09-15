@@ -1,7 +1,7 @@
-# Rebuild the Power BI Overview
+# Rebuild the Power BI report pages
 
-This manual guide recreates the first report page after the existing SQL model
-has been built. It preserves the completed model's table names and uses the
+This manual guide recreates the accepted Overview and Loans & Deposits pages
+after the existing SQL model has been built. It preserves the model's table names and uses the
 versioned DAX files. The current PBIX has been tested by the report author;
 the entire report has not been recreated automatically from this guide.
 
@@ -75,20 +75,20 @@ Run these files in DAX query view:
 | [Calendar sort settings](../powerbi/dax/inspect_calendar_sort_settings.dax) | Three mappings matching the previous paragraph |
 | [Known missing values](../powerbi/dax/validate_imported_missing_values.dax) | Six PASS rows: monthly CPI index/YoY/MoM 61/73/62; quarterly LCR/NSFR/MLH 80/80/212 |
 
-Then run the five numbered measure files in [powerbi/dax](../powerbi/dax/),
-in order 01-05. After each query's checks PASS, use **Update model with changes**
+Then run the eight numbered measure files in [powerbi/dax](../powerbi/dax/),
+in order 01-08. After each query's checks PASS, use **Update model with changes**
 to add its measure and save. Files 01-04 each return three PASS rows; file 05
-returns five. A `DEFINE MEASURE` tested by Run is query-scoped until the model
+returns five; files 06-08 each return four. A `DEFINE MEASURE` tested by Run is query-scoped until the model
 update is applied. These checks target the pinned input snapshot; deliberately
 review their expected values when changing the source data.
 
 The loan-to-deposit and YoY measures depend on the earlier balance measures.
-All five home tables are `fact_bank_monthly`. Apply `#,##0.00` to the amounts
+All eight measures use `fact_bank_monthly` as their home table. Apply `#,##0.00` to the amounts
 and `0.00%` to the ratios. Do not multiply numeric fractions by 100 or convert
 the model measures to formatted text. `FORMAT` in query result columns is only
 for displaying the test output.
 
-## Build and accept the page
+## Build and accept Overview
 
 Create a page named Overview and follow the field/configuration table in
 [Power BI Overview](power_bi_overview.md). Use the raw `month_end_date` field,
@@ -109,6 +109,40 @@ against the acceptance table. Verify both history charts retain their full
 span during month changes and change banks during bank selection. Hover the
 July ANZ endpoints to verify all three amounts. Restore July/All and save the
 PBIX under `exports/Australian_Big_Four_Banking.pbix`.
+
+## Build and accept Loans & Deposits
+
+Create a blank page with tab name **Loans & Deposits** and heading **Loans and
+Deposits**. Add fresh dropdown slicers using `dim_date[year_month]` and
+`dim_bank[bank_code]`, defaulting to July 2026 and All. Follow the field and
+format table in [Loans & Deposits](power_bi_loans_deposits.md).
+
+1. Add three cards using measures 06-08. Select the specific measure when
+   setting Callout display units to None and custom amount format `#,##0.00`.
+2. Add a clustered bar chart with bank_code on Y and Housing Loans plus
+   Business Loans on X. Keep the Legend field well empty; the two measures
+   define the series. Show their legend and two-decimal data labels.
+3. Add a second bar chart with bank_code on Y and Household Deposits on X.
+   Show two-decimal labels, but turn the single-series legend off.
+4. Add two history charts using raw `dim_date[month_end_date]` on a continuous,
+   ascending X-axis. The first uses both loan measures on the same Y-axis;
+   the second uses only Household Deposits. Use Auto Y bounds, amount units
+   None and `#,##0.00`, with point labels Off and tooltips On. Keep the loan
+   legend On and household-deposit legend Off.
+5. Use Format > Edit interactions on this page's source slicers. Month must
+   Filter the three cards and two bank charts and use None for both histories.
+   Bank must Filter all seven data visuals. Check these settings explicitly
+   even when copying existing visuals.
+6. Arrange the cards above two rows, with bank comparisons on the left and
+   the matching histories on the right. Add the four-line source/scope and
+   definition footer from the page guide.
+7. Run that guide's June/All and July/ANZ acceptance checks. Both histories
+   retain their full date span during month changes and filter to the selected
+   bank. Verify the July ANZ and All history endpoints. Restore July/All and
+   save the existing PBIX under `exports/Australian_Big_Four_Banking.pbix`.
+
+Overview was accepted on 2026-09-15; Loans & Deposits was accepted on 2026-09-16.
+Each acceptance includes the author's explicit interaction and save confirmation.
 
 The report's automated DAX checks, earlier visual screenshots and final manual
 interaction confirmation are the evidence for this checkpoint. Source SQL
