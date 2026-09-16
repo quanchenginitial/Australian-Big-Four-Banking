@@ -1,0 +1,69 @@
+// RBA F1.1 FIRMMCRI: monthly-average interbank overnight cash rate, shared across banks.
+// Source per-cent units are divided by 100 once; format the numeric measure 0.00%.
+// The macro fact covers March 2019-July 2026 in the pinned banking snapshot.
+// Expected values are independently read from the original RBA workbook.
+DEFINE
+    MEASURE 'fact_macro_monthly'[Interbank Cash Rate (Monthly Avg, %)] =
+        VAR LatestReportDate =
+            MAX ('fact_macro_monthly'[report_date])
+        VAR RateAtLatestDate =
+            CALCULATE (
+                SELECTEDVALUE ('fact_macro_monthly'[interbank_cash_rate_pct]),
+                KEEPFILTERS (
+                    'fact_macro_monthly'[report_date] = LatestReportDate
+                )
+            )
+        RETURN
+            IF (
+                ISBLANK (LatestReportDate),
+                BLANK (),
+                DIVIDE (RateAtLatestDate, 100)
+            )
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "latest_all",
+            "actual_value", [Interbank Cash Rate (Monthly Avg, %)],
+            "expected_value", 0.043500
+        ),
+        ROW (
+            "check_name", "latest_anz_same_macro_rate",
+            "actual_value", CALCULATE ([Interbank Cash Rate (Monthly Avg, %)], 'dim_bank'[bank_code] = "ANZ"),
+            "expected_value", 0.043500
+        ),
+        ROW (
+            "check_name", "month_2025_08_distinct_from_target",
+            "actual_value", CALCULATE ([Interbank Cash Rate (Monthly Avg, %)], 'dim_date'[year_month] = "2025-08"),
+            "expected_value", 0.036900
+        ),
+        ROW (
+            "check_name", "before_fact_2019_02_blank",
+            "actual_value", CALCULATE ([Interbank Cash Rate (Monthly Avg, %)], 'dim_date'[year_month] = "2019-02"),
+            "expected_value", BLANK ()
+        ),
+        ROW (
+            "check_name", "after_fact_2026_08_blank",
+            "actual_value", CALCULATE ([Interbank Cash Rate (Monthly Avg, %)], 'dim_date'[year_month] = "2026-08"),
+            "expected_value", BLANK ()
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "actual_pct", IF (ISBLANK ([actual_value]), "BLANK", FORMAT ([actual_value], "0.00%")),
+        "expected_pct", IF (ISBLANK ([expected_value]), "BLANK", FORMAT ([expected_value], "0.00%")),
+        "status",
+            IF (
+                ISBLANK ([expected_value]),
+                IF (ISBLANK ([actual_value]), "PASS", "FAIL"),
+                IF (
+                    NOT ISBLANK ([actual_value])
+                        && ABS ([actual_value] - [expected_value]) < 0.0000000001,
+                    "PASS",
+                    "FAIL"
+                )
+            )
+    )
+ORDER BY [check_name]

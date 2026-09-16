@@ -13,10 +13,11 @@ detail table. Project results were confirmed through DBeaver on 2026-09-11 and
 2026-09-13. The SQL analysis model is also complete: a shared daily date
 dimension and four monthly/quarterly facts have passed individual and integrated
 checks. Power BI import, six active dimension relationships, calendar settings
-and eight DAX measures are now validated. The Overview page was accepted
-on 2026-09-15, followed by Loans & Deposits on 2026-09-16. Both pages have
-passed their final month/bank interaction and save checks. Macro and
-capital/liquidity report pages remain in progress.
+and twelve DAX measures are now validated. Overview was accepted on
+2026-09-15; Loans & Deposits and Macro Context followed on 2026-09-16.
+All three pages have passed their final interaction, endpoint and save
+checks, including missing-value display on Macro Context. Capital/liquidity
+reporting and the final project release review remain in progress.
 The source-loading and transformation scripts have also passed independent
 DuckDB tests against the downloaded Excel snapshots.
 
@@ -129,11 +130,12 @@ two bank facts. All six relationships are now configured as active, single-direc
 one-to-many relationships in Power BI, with date marking and sort settings verified. See the [model plan and diagram](docs/analysis_model_plan.md)
 and [integrated validation results](docs/model_validation.md).
 
-Two Power BI pages and eight measures are complete. See the
+Three Power BI pages and twelve measures are complete. See the
 [Overview report](docs/power_bi_overview.md),
-[Loans & Deposits report](docs/power_bi_loans_deposits.md) and
+[Loans & Deposits report](docs/power_bi_loans_deposits.md),
+[Macro Context report](docs/power_bi_macro_context.md) and
 [Power BI rebuild guide](docs/rebuild_power_bi.md).
-Further banking analysis, capital/liquidity and macro report pages remain in progress.
+Further banking analysis and capital/liquidity reporting remain in progress.
 Table 18 expenditure detail remains a later extension with its own series grain.
 
 ## Power BI Overview
@@ -181,10 +183,38 @@ on 2026-09-16. The screenshot is a static preview; the local PBIX stays in
 the ignored `exports/` directory.
 
 - [Definitions, chart configuration and acceptance values](docs/power_bi_loans_deposits.md)
-- [Rebuild both accepted pages](docs/rebuild_power_bi.md)
+- [Rebuild all three accepted pages](docs/rebuild_power_bi.md)
 - [Housing Loans DAX and checks](powerbi/dax/06_housing_loans.dax)
 - [Business Loans DAX and checks](powerbi/dax/07_business_loans.dax)
 - [Household Deposits DAX and checks](powerbi/dax/08_household_deposits.dax)
+
+## Power BI Macro Context
+
+![Australian Big Four Banking Macro Context](reports/macro_context.png)
+
+The third page places the banking snapshot alongside national interest rates
+and inflation. At July 2026, its cards show the monthly-average cash-rate
+target **4.35%**, interbank overnight cash rate **4.35%**, three-month bank-bill
+rate **4.48%** and published CPI annual change **3.50%**.
+
+The RBA F1.1 rate chart spans March 2019-July 2026. The ABS Original All groups
+CPI YoY chart shows its available April 2025-July 2026 history; earlier values
+remain unavailable. These are national observations shared by all banks, so
+this page has a month selector and no bank selector. Cards follow the selected
+month while both charts retain their available histories.
+
+Four additional DAX measures passed 21 source-derived checks. The author
+confirmed the chart endpoints, June card changes with unchanged histories,
+March 2025 CPI blank display, restoration of July and saving on 2026-09-16.
+This is a fixed snapshot and a static preview; the PBIX remains local under
+ignored `exports/`.
+
+- [Definitions, source series and accepted checks](docs/power_bi_macro_context.md)
+- [Rebuild all three accepted pages](docs/rebuild_power_bi.md)
+- [Cash Rate Target DAX and checks](powerbi/dax/09_cash_rate_target.dax)
+- [Interbank Cash Rate DAX and checks](powerbi/dax/10_interbank_cash_rate.dax)
+- [3M Bank Bill Rate DAX and checks](powerbi/dax/11_bank_bill_3m.dax)
+- [CPI YoY DAX and checks](powerbi/dax/12_cpi_yoy.dax)
 
 ## Tools
 
@@ -302,4 +332,5 @@ process has not yet been implemented.
 - [Analysis model rebuild guide](docs/rebuild_analysis_model.md): source prerequisites, scripts 19-25, expected outputs and snapshot-refresh boundaries.
 - [Power BI Overview](docs/power_bi_overview.md): five measures, chart fields, reporting scope and accepted interactions.
 - [Power BI Loans & Deposits](docs/power_bi_loans_deposits.md): three additional measures, bank comparisons, histories and accepted interactions.
-- [Power BI rebuild guide](docs/rebuild_power_bi.md): import, model settings, eight DAX measures and both report pages.
+- [Power BI Macro Context](docs/power_bi_macro_context.md): four national macro measures, available histories, source coverage and accepted interactions.
+- [Power BI rebuild guide](docs/rebuild_power_bi.md): import, model settings, twelve DAX measures and all three accepted report pages.

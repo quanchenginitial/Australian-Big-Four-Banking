@@ -1,0 +1,74 @@
+// ABS monthly Table 1, Australia Original All groups CPI: published YoY change.
+// Source series A130393721F; published per-cent values are divided by 100 once.
+// Keep the measure numeric; format 0.00%. Preserve source blanks (YoY starts Apr 2025).
+// The macro fact covers Mar 2019-Jul 2026; expected values use the pinned workbook.
+DEFINE
+    MEASURE 'fact_macro_monthly'[CPI YoY (%)] =
+        VAR LatestReportDate =
+            MAX ('fact_macro_monthly'[report_date])
+        VAR CPIYoYAtLatestDate =
+            CALCULATE (
+                SELECTEDVALUE ('fact_macro_monthly'[cpi_yoy_pct]),
+                KEEPFILTERS (
+                    'fact_macro_monthly'[report_date] = LatestReportDate
+                )
+            )
+        RETURN
+            IF (
+                ISBLANK (LatestReportDate) || ISBLANK (CPIYoYAtLatestDate),
+                BLANK (),
+                DIVIDE (CPIYoYAtLatestDate, 100)
+            )
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "latest_all",
+            "actual_value", [CPI YoY (%)],
+            "expected_value", 0.035000
+        ),
+        ROW (
+            "check_name", "latest_anz_same_macro_cpi",
+            "actual_value", CALCULATE ([CPI YoY (%)], 'dim_bank'[bank_code] = "ANZ"),
+            "expected_value", 0.035000
+        ),
+        ROW (
+            "check_name", "month_2026_06",
+            "actual_value", CALCULATE ([CPI YoY (%)], 'dim_date'[year_month] = "2026-06"),
+            "expected_value", 0.038000
+        ),
+        ROW (
+            "check_name", "first_available_2025_04",
+            "actual_value", CALCULATE ([CPI YoY (%)], 'dim_date'[year_month] = "2025-04"),
+            "expected_value", 0.024000
+        ),
+        ROW (
+            "check_name", "before_yoy_2025_03_blank",
+            "actual_value", CALCULATE ([CPI YoY (%)], 'dim_date'[year_month] = "2025-03"),
+            "expected_value", BLANK ()
+        ),
+        ROW (
+            "check_name", "after_fact_2026_08_blank",
+            "actual_value", CALCULATE ([CPI YoY (%)], 'dim_date'[year_month] = "2026-08"),
+            "expected_value", BLANK ()
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "actual_pct", IF (ISBLANK ([actual_value]), "BLANK", FORMAT ([actual_value], "0.00%")),
+        "expected_pct", IF (ISBLANK ([expected_value]), "BLANK", FORMAT ([expected_value], "0.00%")),
+        "status",
+            IF (
+                ISBLANK ([expected_value]),
+                IF (ISBLANK ([actual_value]), "PASS", "FAIL"),
+                IF (
+                    NOT ISBLANK ([actual_value])
+                        && ABS ([actual_value] - [expected_value]) < 0.0000000001,
+                    "PASS",
+                    "FAIL"
+                )
+            )
+    )
+ORDER BY [check_name]

@@ -1,7 +1,8 @@
 # Rebuild the Power BI report pages
 
-This manual guide recreates the accepted Overview and Loans & Deposits pages
-after the existing SQL model has been built. It preserves the model's table names and uses the
+This manual guide recreates the accepted Overview, Loans & Deposits and
+Macro Context pages after the existing SQL model has been built. It preserves
+the model's table names and uses the
 versioned DAX files. The current PBIX has been tested by the report author;
 the entire report has not been recreated automatically from this guide.
 
@@ -75,16 +76,18 @@ Run these files in DAX query view:
 | [Calendar sort settings](../powerbi/dax/inspect_calendar_sort_settings.dax) | Three mappings matching the previous paragraph |
 | [Known missing values](../powerbi/dax/validate_imported_missing_values.dax) | Six PASS rows: monthly CPI index/YoY/MoM 61/73/62; quarterly LCR/NSFR/MLH 80/80/212 |
 
-Then run the eight numbered measure files in [powerbi/dax](../powerbi/dax/),
-in order 01-08. After each query's checks PASS, use **Update model with changes**
+Then run the twelve numbered measure files in [powerbi/dax](../powerbi/dax/),
+in order 01-12. After each query's checks PASS, use **Update model with changes**
 to add its measure and save. Files 01-04 each return three PASS rows; file 05
-returns five; files 06-08 each return four. A `DEFINE MEASURE` tested by Run is query-scoped until the model
+returns five; files 06-08 each return four; files 09-11 each return five;
+file 12 returns six. A `DEFINE MEASURE` tested by Run is query-scoped until the model
 update is applied. These checks target the pinned input snapshot; deliberately
 review their expected values when changing the source data.
 
 The loan-to-deposit and YoY measures depend on the earlier balance measures.
-All eight measures use `fact_bank_monthly` as their home table. Apply `#,##0.00` to the amounts
-and `0.00%` to the ratios. Do not multiply numeric fractions by 100 or convert
+Measures 01-08 use `fact_bank_monthly` as their home table; measures 09-12
+use `fact_macro_monthly`. Apply `#,##0.00` to the amounts and `0.00%`
+to the ratios and all four macro measures. Do not multiply numeric fractions by 100 or convert
 the model measures to formatted text. `FORMAT` in query result columns is only
 for displaying the test output.
 
@@ -141,7 +144,42 @@ format table in [Loans & Deposits](power_bi_loans_deposits.md).
    bank. Verify the July ANZ and All history endpoints. Restore July/All and
    save the existing PBIX under `exports/Australian_Big_Four_Banking.pbix`.
 
-Overview was accepted on 2026-09-15; Loans & Deposits was accepted on 2026-09-16.
+## Build and accept Macro Context
+
+Create a blank page with tab name and heading **Macro Context**. Add a month
+dropdown using `dim_date[year_month]`, defaulting to July 2026. This page uses
+national observations and has no bank selector. Keep the existing date-to-macro
+relationship and Single dimension-to-fact filtering. Follow the full
+[Macro Context configuration and acceptance guide](power_bi_macro_context.md).
+
+1. Add four cards using measures 09-12. Set each measure's model format to
+   Percentage with two decimals or Custom `0.00%`. Inspect each visual's
+   General > Data format and set display units None. RBA source rates are
+   monthly averages; CPI is the published annual percentage change.
+2. Add a line chart with raw `dim_date[month_end_date]` on continuous ascending
+   X and all three rate measures on the shared primary Y-axis. Leave the
+   Secondary Y-axis and Legend field empty, but turn the displayed legend On.
+   Use title Interest Rates Trend - Full History (Monthly Avg, %).
+3. Add the CPI line chart to the right using the same raw date axis and only
+   CPI YoY on Y. Turn its legend Off and use the title
+   CPI YoY Trend - Available History (%).
+4. Give both histories Auto axis bounds, percentage Y-axis formatting,
+   display units None, point labels Off and tooltips On. Do not fill missing
+   CPI observations with zero or extend the available series to earlier years.
+5. Select the month slicer and use Format > Edit interactions: Filter on all
+   four cards, None on both history charts. Verify the new chart's interactions
+   explicitly when copying visuals.
+6. Align the four cards above the two side-by-side charts. Add the four-line
+   source, coverage and national-scope footer from the page guide.
+7. Check rate history starts in March 2019 and ends in July 2026 at
+   4.35%/4.35%/4.48%. Check CPI starts at April 2025, 2.40%, and ends at
+   July 2026, 3.50%. Select June: cards become 4.35%/4.35%/4.46%/3.80%
+   while both histories stay unchanged through July. Select March 2025:
+   CPI displays a missing-value placeholder and both histories stay unchanged.
+   Restore July, clear visual selections and save the existing local PBIX.
+
+Overview was accepted on 2026-09-15; Loans & Deposits and Macro Context
+were accepted on 2026-09-16.
 Each acceptance includes the author's explicit interaction and save confirmation.
 
 The report's automated DAX checks, earlier visual screenshots and final manual
