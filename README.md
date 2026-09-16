@@ -13,11 +13,12 @@ detail table. Project results were confirmed through DBeaver on 2026-09-11 and
 2026-09-13. The SQL analysis model is also complete: a shared daily date
 dimension and four monthly/quarterly facts have passed individual and integrated
 checks. Power BI import, six active dimension relationships, calendar settings
-and twelve DAX measures are now validated. Overview was accepted on
-2026-09-15; Loans & Deposits and Macro Context followed on 2026-09-16.
-All three pages have passed their final interaction, endpoint and save
-checks, including missing-value display on Macro Context. Capital/liquidity
-reporting and the final project release review remain in progress.
+and seventeen DAX measures are now validated. Overview was accepted on
+2026-09-15; Loans & Deposits and Macro Context followed on 2026-09-16,
+and Capital & Liquidity on 2026-09-17. All four pages have passed their
+numerical, interaction, history-endpoint and final save checks, including
+missing-value behavior for CPI and liquidity ratios. The final project
+release review remains in progress.
 The source-loading and transformation scripts have also passed independent
 DuckDB tests against the downloaded Excel snapshots.
 
@@ -130,12 +131,13 @@ two bank facts. All six relationships are now configured as active, single-direc
 one-to-many relationships in Power BI, with date marking and sort settings verified. See the [model plan and diagram](docs/analysis_model_plan.md)
 and [integrated validation results](docs/model_validation.md).
 
-Three Power BI pages and twelve measures are complete. See the
+Four Power BI pages and seventeen measures are complete. See the
 [Overview report](docs/power_bi_overview.md),
 [Loans & Deposits report](docs/power_bi_loans_deposits.md),
-[Macro Context report](docs/power_bi_macro_context.md) and
+[Macro Context report](docs/power_bi_macro_context.md),
+[Capital & Liquidity report](docs/power_bi_capital_liquidity.md) and
 [Power BI rebuild guide](docs/rebuild_power_bi.md).
-Further banking analysis and capital/liquidity reporting remain in progress.
+Further interpretation of the results and the final release review remain in progress.
 Table 18 expenditure detail remains a later extension with its own series grain.
 
 ## Power BI Overview
@@ -183,7 +185,7 @@ on 2026-09-16. The screenshot is a static preview; the local PBIX stays in
 the ignored `exports/` directory.
 
 - [Definitions, chart configuration and acceptance values](docs/power_bi_loans_deposits.md)
-- [Rebuild all three accepted pages](docs/rebuild_power_bi.md)
+- [Rebuild all four accepted pages](docs/rebuild_power_bi.md)
 - [Housing Loans DAX and checks](powerbi/dax/06_housing_loans.dax)
 - [Business Loans DAX and checks](powerbi/dax/07_business_loans.dax)
 - [Household Deposits DAX and checks](powerbi/dax/08_household_deposits.dax)
@@ -210,11 +212,40 @@ This is a fixed snapshot and a static preview; the PBIX remains local under
 ignored `exports/`.
 
 - [Definitions, source series and accepted checks](docs/power_bi_macro_context.md)
-- [Rebuild all three accepted pages](docs/rebuild_power_bi.md)
+- [Rebuild all four accepted pages](docs/rebuild_power_bi.md)
 - [Cash Rate Target DAX and checks](powerbi/dax/09_cash_rate_target.dax)
 - [Interbank Cash Rate DAX and checks](powerbi/dax/10_interbank_cash_rate.dax)
 - [3M Bank Bill Rate DAX and checks](powerbi/dax/11_bank_bill_3m.dax)
 - [CPI YoY DAX and checks](powerbi/dax/12_cpi_yoy.dax)
+
+## Power BI Capital & Liquidity
+
+![Australian Big Four Banking Capital and Liquidity](reports/capital_liquidity.png)
+
+The fourth page shows quarterly CET1 capital and risk-weighted assets, with
+separate bank comparisons and histories for CET1 ratio, mean LCR and NSFR.
+At 2026 Q1 / All, the two cards show **AUD 226.60 bn** and **AUD 1,889.68 bn**.
+Reported bank ratios are displayed individually; they are not summed or averaged.
+
+The APRA ADI data uses each entity's highest consolidation level, distinct
+from the monthly MADIS domestic, unconsolidated scope. CET1 history spans
+2013 Q1-2026 Q1 and notes the 2023 capital-framework change. LCR and NSFR
+show their available 2018 Q1-2026 Q1 histories; earlier missing values stay blank.
+The quarter selector filters the cards and bank comparisons while histories
+retain their available ranges. The bank selector filters all eight data visuals.
+
+Five additional measures passed 39 source-derived DAX checks. History endpoints,
+quarter/bank filtering, missing liquidity displays, restoration of 2026 Q1 / All
+and final saving were accepted on 2026-09-17. The screenshot is a static preview;
+the PBIX remains local under ignored `exports/`.
+
+- [Definitions, bank values, history endpoints and accepted checks](docs/power_bi_capital_liquidity.md)
+- [Rebuild all four accepted pages](docs/rebuild_power_bi.md)
+- [CET1 Capital DAX and checks](powerbi/dax/13_cet1_capital.dax)
+- [Risk-Weighted Assets DAX and checks](powerbi/dax/14_risk_weighted_assets.dax)
+- [CET1 Ratio DAX and checks](powerbi/dax/15_cet1_ratio.dax)
+- [LCR DAX and checks](powerbi/dax/16_lcr.dax)
+- [NSFR DAX and checks](powerbi/dax/17_nsfr.dax)
 
 ## Tools
 
@@ -333,4 +364,5 @@ process has not yet been implemented.
 - [Power BI Overview](docs/power_bi_overview.md): five measures, chart fields, reporting scope and accepted interactions.
 - [Power BI Loans & Deposits](docs/power_bi_loans_deposits.md): three additional measures, bank comparisons, histories and accepted interactions.
 - [Power BI Macro Context](docs/power_bi_macro_context.md): four national macro measures, available histories, source coverage and accepted interactions.
-- [Power BI rebuild guide](docs/rebuild_power_bi.md): import, model settings, twelve DAX measures and all three accepted report pages.
+- [Power BI Capital & Liquidity](docs/power_bi_capital_liquidity.md): five quarterly measures, bank comparisons, available histories, framework note and accepted checks.
+- [Power BI rebuild guide](docs/rebuild_power_bi.md): import, model settings, seventeen DAX measures and all four accepted report pages.

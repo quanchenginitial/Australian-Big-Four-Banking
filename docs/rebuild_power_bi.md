@@ -1,8 +1,8 @@
 # Rebuild the Power BI report pages
 
-This manual guide recreates the accepted Overview, Loans & Deposits and
-Macro Context pages after the existing SQL model has been built. It preserves
-the model's table names and uses the
+This manual guide recreates the four accepted pages: Overview, Loans &
+Deposits, Macro Context and Capital & Liquidity. Build the existing SQL
+model first. This guide preserves its table names and uses the
 versioned DAX files. The current PBIX has been tested by the report author;
 the entire report has not been recreated automatically from this guide.
 
@@ -76,17 +76,19 @@ Run these files in DAX query view:
 | [Calendar sort settings](../powerbi/dax/inspect_calendar_sort_settings.dax) | Three mappings matching the previous paragraph |
 | [Known missing values](../powerbi/dax/validate_imported_missing_values.dax) | Six PASS rows: monthly CPI index/YoY/MoM 61/73/62; quarterly LCR/NSFR/MLH 80/80/212 |
 
-Then run the twelve numbered measure files in [powerbi/dax](../powerbi/dax/),
-in order 01-12. After each query's checks PASS, use **Update model with changes**
+Then run the seventeen numbered measure files in [powerbi/dax](../powerbi/dax/),
+in order 01-17. After each query's checks PASS, use **Update model with changes**
 to add its measure and save. Files 01-04 each return three PASS rows; file 05
 returns five; files 06-08 each return four; files 09-11 each return five;
-file 12 returns six. A `DEFINE MEASURE` tested by Run is query-scoped until the model
+file 12 returns six; files 13-14 each return five; file 15 returns nine;
+files 16-17 each return ten. A `DEFINE MEASURE` tested by Run is query-scoped until the model
 update is applied. These checks target the pinned input snapshot; deliberately
 review their expected values when changing the source data.
 
 The loan-to-deposit and YoY measures depend on the earlier balance measures.
 Measures 01-08 use `fact_bank_monthly` as their home table; measures 09-12
-use `fact_macro_monthly`. Apply `#,##0.00` to the amounts and `0.00%`
+use `fact_macro_monthly`; measures 13-17 use `fact_bank_quarterly`.
+Apply `#,##0.00` to the amounts and `0.00%`
 to the ratios and all four macro measures. Do not multiply numeric fractions by 100 or convert
 the model measures to formatted text. `FORMAT` in query result columns is only
 for displaying the test output.
@@ -178,8 +180,47 @@ relationship and Single dimension-to-fact filtering. Follow the full
    CPI displays a missing-value placeholder and both histories stay unchanged.
    Restore July, clear visual selections and save the existing local PBIX.
 
+## Build and accept Capital & Liquidity
+
+Create a blank page with tab name **Capital & Liquidity** and heading
+**Capital and Liquidity**. Add dropdowns using `dim_date[year_quarter]`
+and `dim_bank[bank_code]`, defaulting to **2026 Q1 / All**. Quarter labels
+contain a space. Keep the accepted dimension-to-fact relationships. Follow
+the [Capital & Liquidity guide](power_bi_capital_liquidity.md).
+
+1. Add two cards with measures 13-14, using `#,##0.00` and display units
+   None. They sum selected banks at one fact date, not across quarters.
+2. Add three clustered bar charts: bank_code on Y and one of measures
+   15-17 on X. Use the complete CET1/LCR/NSFR titles from the page guide,
+   descending ratio order, a zero-based percent X-axis, automatic maximum,
+   and two-decimal percentage labels.
+3. Below each comparison add its matching line chart. Use the plain
+   `dim_date[quarter_end_date]` on continuous ascending X, one measure on
+   Y, and `dim_bank[bank_code]` in Legend. The bank context is required:
+   the ratio measures deliberately return BLANK for All/multiple banks
+   without a separate bank category or legend series.
+4. Use `0.00%`, display units None, automatic axis bounds, point labels
+   Off, tooltips On and bottom legends with consistent bank colours. The
+   source ratios are already fractions; do not divide by 100 again. Keep
+   LCR's Mean label. CET1 uses Full History (2013 Q1-2026 Q1); LCR and
+   NSFR use Available History (2018 Q1-2026 Q1). Keep earlier blanks.
+5. Set the quarter slicer to Filter for the two cards and three comparisons,
+   and None for all three histories. Set the bank slicer to Filter for all
+   eight data visuals. Verify these incoming interactions on copied charts.
+   Clear selected bars or line points before checking the default view.
+6. Add the 2023 capital-framework note under CET1 and the five-line footer
+   from the page guide below the three histories. The ADI source uses each
+   entity's highest consolidation level, unlike monthly MADIS.
+7. Check all history first/last values against the guide. At 2025 Q4 / All,
+   cards become 225.45 and 1,869.82 while histories retain their ranges.
+   Select ANZ and confirm one history per metric. At 2017 Q4 / ANZ, LCR
+   and NSFR bars are absent while their 2018 Q1-2026 Q1 histories remain.
+8. Restore 2026 Q1 / All: cards show 226.60 and 1,889.68; bank ratios match
+   the guide. Clear chart selections, ensure the footer and legends are
+   readable, and save the existing local PBIX under `exports/`.
+
 Overview was accepted on 2026-09-15; Loans & Deposits and Macro Context
-were accepted on 2026-09-16.
+on 2026-09-16; Capital & Liquidity on 2026-09-17.
 Each acceptance includes the author's explicit interaction and save confirmation.
 
 The report's automated DAX checks, earlier visual screenshots and final manual

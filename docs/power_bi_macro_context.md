@@ -3,8 +3,9 @@
 The third report page was accepted on 16 September 2026. It contains four
 validated national macro measures, two history charts, a month dropdown and
 source/coverage notes. The report author confirmed the endpoint, date-filter,
-missing-value and final save checks. Capital/liquidity reporting and the final
-project release review remain in progress.
+missing-value and final save checks. [Capital & Liquidity](power_bi_capital_liquidity.md)
+was accepted on 17 September 2026. The final project release review remains
+in progress.
 
 ![Macro Context page](../reports/macro_context.png)
 
@@ -132,5 +133,5 @@ This acceptance combines source-derived DAX checks, report screenshots and
 the author's manual confirmation. It is not an automated UI test or a full
 independent reconstruction of the PBIX. The preview is a static screenshot;
 the local PBIX stays under ignored `exports/`. Use the
-[Power BI rebuild guide](rebuild_power_bi.md) to recreate all three accepted
+[Power BI rebuild guide](rebuild_power_bi.md) to recreate all four accepted
 pages from the versioned scripts.

@@ -1,0 +1,119 @@
+// APRA ADI: published CET1 ratio for one bank, at one publication-quarter end.
+// Pinned Table 4 column K is already a numeric fraction: do not divide by 100.
+// Preserve reported ratios; do not recompute them from capital and RWA amounts.
+// All or multiple banks return BLANK, including banks with equal reported ratios.
+// Original source cells: latest K7/K24/K53/K78; prior ANZ K83.
+DEFINE
+    MEASURE 'fact_bank_quarterly'[CET1 Ratio (%)] =
+        VAR HasSingleBank =
+            HASONEVALUE ('dim_bank'[bank_code])
+        VAR LatestReportDate =
+            MAX ('fact_bank_quarterly'[report_date])
+        VAR RatioAtLatestDate =
+            CALCULATE (
+                SELECTEDVALUE ('fact_bank_quarterly'[cet1_ratio]),
+                KEEPFILTERS (
+                    'fact_bank_quarterly'[report_date] = LatestReportDate
+                )
+            )
+        RETURN
+            IF (
+                HasSingleBank && NOT ISBLANK (LatestReportDate),
+                RatioAtLatestDate,
+                BLANK ()
+            )
+
+EVALUATE
+VAR Checks =
+    UNION (
+        ROW (
+            "check_name", "latest_all_blank",
+            "actual_value", [CET1 Ratio (%)],
+            "expected_value", BLANK ()
+        ),
+        ROW (
+            "check_name", "latest_anz",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] = "ANZ"
+            ),
+            "expected_value", 0.124
+        ),
+        ROW (
+            "check_name", "latest_cba",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] = "CBA"
+            ),
+            "expected_value", 0.116
+        ),
+        ROW (
+            "check_name", "latest_nab",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] = "NAB"
+            ),
+            "expected_value", 0.116
+        ),
+        ROW (
+            "check_name", "latest_wbc",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] = "WBC"
+            ),
+            "expected_value", 0.124
+        ),
+        ROW (
+            "check_name", "latest_anz_wbc_same_ratio_blank",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] IN { "ANZ", "WBC" }
+            ),
+            "expected_value", BLANK ()
+        ),
+        ROW (
+            "check_name", "anz_2025_q4",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] = "ANZ",
+                'dim_date'[year_quarter] = "2025 Q4"
+            ),
+            "expected_value", 0.121
+        ),
+        ROW (
+            "check_name", "after_fact_2026_q2_anz_blank",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] = "ANZ",
+                'dim_date'[year_quarter] = "2026 Q2"
+            ),
+            "expected_value", BLANK ()
+        ),
+        ROW (
+            "check_name", "non_reporting_month_2026_02_anz_blank",
+            "actual_value", CALCULATE (
+                [CET1 Ratio (%)],
+                'dim_bank'[bank_code] = "ANZ",
+                'dim_date'[year_month] = "2026-02"
+            ),
+            "expected_value", BLANK ()
+        )
+    )
+RETURN
+    ADDCOLUMNS (
+        Checks,
+        "actual_pct", IF (ISBLANK ([actual_value]), "BLANK", FORMAT ([actual_value], "0.00%")),
+        "expected_pct", IF (ISBLANK ([expected_value]), "BLANK", FORMAT ([expected_value], "0.00%")),
+        "status",
+            IF (
+                ISBLANK ([expected_value]),
+                IF (ISBLANK ([actual_value]), "PASS", "FAIL"),
+                IF (
+                    NOT ISBLANK ([actual_value])
+                        && ABS ([actual_value] - [expected_value]) < 0.0000000001,
+                    "PASS",
+                    "FAIL"
+                )
+            )
+    )
+ORDER BY [check_name]

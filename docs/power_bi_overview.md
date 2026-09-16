@@ -3,7 +3,7 @@
 The first report page was completed on 15 September 2026. It combines five
 validated measures, two bank comparisons, two history charts, month and bank
 selectors, and a source/scope footer. Final visual interaction and save checks
-were confirmed by the report author. Further report pages remain in progress.
+were confirmed by the report author. The other three planned pages are also accepted; the final release review remains in progress.
 
 ![Overview page](../reports/overview.png)
 
@@ -112,9 +112,11 @@ No complete value-by-value Power BI reconciliation is claimed.
 The local PBIX is stored under the ignored `exports/` directory. This repository
 checkpoint includes the static preview, query text and manual rebuild guide;
 it does not publish an interactive report or distribute the raw workbooks.
-Additional business analysis and report pages, documentation of findings,
-and the final end-to-end release review remain in progress. Capital/liquidity
-and macro measures require their own reporting-scope and aggregation rules.
+The [Loans & Deposits](power_bi_loans_deposits.md), [Macro Context](power_bi_macro_context.md)
+and [Capital & Liquidity](power_bi_capital_liquidity.md) pages are also accepted.
+Their source scopes and aggregation rules are documented separately.
+Further interpretation of the findings and the final end-to-end release
+review remain in progress.
 
 References: [Power BI DAX query view](https://learn.microsoft.com/en-us/power-bi/transform-model/dax-query-view),
 [visual interactions](https://learn.microsoft.com/en-us/power-bi/create-reports/service-reports-visual-interactions),

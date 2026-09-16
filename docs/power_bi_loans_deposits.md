@@ -4,7 +4,9 @@ The second report page was accepted on 16 September 2026. It contains three
 validated balance measures, two bank comparisons, two full-history charts,
 month/bank dropdowns and source/definition notes. The report author confirmed
 the final interaction, endpoint and save checks. [Macro Context](power_bi_macro_context.md)
-was also accepted on 16 September 2026; capital/liquidity reporting remains in progress.
+was also accepted on 16 September 2026, followed by
+[Capital & Liquidity](power_bi_capital_liquidity.md) on 17 September 2026.
+The final project release review remains in progress.
 
 ![Loans and Deposits page](../reports/loans_deposits.png)
 
@@ -110,4 +112,4 @@ This acceptance combines source-derived query checks, report screenshots and
 the author's manual confirmation. It is not an automated UI test or an
 independent rebuild of the entire PBIX. The preview is static; the local PBIX
 remains under ignored `exports/`. Use the [rebuild guide](rebuild_power_bi.md)
-to recreate the model and all three accepted pages from the versioned scripts.
+to recreate the model and all four accepted pages from the versioned scripts.
