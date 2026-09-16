@@ -34,7 +34,7 @@ Balances can be combined across banks at the same date within the common reporti
 
 The table declares a composite primary key and a CHECK requiring `report_date = LAST_DAY(report_date)`. Together they enforce at most one row per bank/month. NOT NULL constraints prevent absent keys and amounts. The four bank codes and the fixed history are verified by the validation queries.
 
-No database foreign-key constraints are declared. The existing `core.dim_bank` was created without a declared primary key. Section 6 explicitly checks dimensional matches, bank-key uniqueness, bank metadata and the row count after both lookups. These query checks are distinct from database constraints and the Power BI relationships that will be configured later. A future dimension edit requires rerunning the checks.
+No database foreign-key constraints are declared. The existing `core.dim_bank` was created without a declared primary key. Section 6 explicitly checks dimensional matches, bank-key uniqueness, bank metadata and the row count after both lookups. These query checks are distinct from database constraints and the accepted Power BI relationships documented in the [report rebuild guide](rebuild_power_bi.md). A future dimension edit requires rerunning the checks.
 
 For the later model, `core.dim_bank` will filter the bank fact through `bank_code`, and `core.dim_date` through `calendar_date` to `report_date`. Month-end attributes in the daily dimension repeat and are not its unique relationship key. Macro observations will have their own facts sharing the date dimension.
 

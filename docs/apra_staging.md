@@ -70,4 +70,4 @@ A later [source-rebuild comparison](rebuild_apra.md), confirmed on 2026-09-11, m
 - Sections 3-5 of the script are read-only checks and can be rerun against the existing table.
 - The table is a stored snapshot. Changes to the source tables do not automatically refresh it; a controlled refresh process remains to be added.
 - Raw-data loading and bank-mapping creation are now captured in [setup/01_create_apra_inputs.sql](../sql/setup/01_create_apra_inputs.sql). Follow the [rebuild guide](rebuild_apra.md) to reconstruct the APRA inputs and staging table in a separate empty database.
-- Validation of the remaining workbooks, analytical modelling and Power BI reporting are subsequent phases.
+- The remaining source modules, core analysis model and four Power BI pages have since been accepted. See the [final review](final_review.md) and follow the rebuild guides in their recorded source/model/report order.

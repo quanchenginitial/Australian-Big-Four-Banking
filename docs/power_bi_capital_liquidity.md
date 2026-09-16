@@ -5,7 +5,8 @@ amount cards, three bank comparisons and three bank-level history charts,
 using five validated measures. The author confirmed numerical and interaction
 checks, restored 2026 Q1 / All, adjusted the final layout and saved the report.
 All four planned Power BI pages and seventeen measures are now accepted;
-the final project release review remains in progress.
+the [final review](final_review.md) and [analysis findings](analysis_findings.md)
+record completion of this snapshot and its analytical limits.
 
 ![Capital and Liquidity page](../reports/capital_liquidity.png)
 

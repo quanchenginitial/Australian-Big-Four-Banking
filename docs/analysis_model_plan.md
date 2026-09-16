@@ -1,6 +1,6 @@
 # Analysis model: grains, periods and date joins
 
-Initial decisions from step 6A, confirmed on 2026-09-13 after commit `1f5bedd`. All six source modules, all three project outputs from [19_check_model_joins.sql](../sql/19_check_model_joins.sql), the shared date dimension, all four facts and the integrated model checks are confirmed. Power BI configuration and reporting remain subsequent work.
+Initial decisions from step 6A, confirmed on 2026-09-13 after commit `1f5bedd`. All six source modules, all three project outputs from [19_check_model_joins.sql](../sql/19_check_model_joins.sql), the shared date dimension, all four facts and the integrated model checks are confirmed. Power BI configuration and all four report pages are now accepted; see the [final review](final_review.md).
 
 ## Reporting scope
 
@@ -31,7 +31,7 @@ Reuse `core.dim_bank` as the four-bank dimension, with `bank_code` as its relati
 
 Configure one-to-many relationships with filtering from dimensions to facts. The date dimension filters all four core facts, while the bank dimension filters the two banking facts. Do not link the fact tables directly. This follows the relationship roles in [Microsoft's model relationship guidance](https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-relationships-understand).
 
-The diagram shows the intended filter direction. The SQL tables and their key coverage are validated; these Power BI relationships have not yet been configured.
+The diagram shows the dimension-to-fact filter direction. All six relationships are now configured as active, single-direction one-to-many relationships in Power BI, with date marking and sorting accepted. See the [Power BI rebuild guide](rebuild_power_bi.md).
 
 ```mermaid
 flowchart LR
@@ -135,4 +135,4 @@ Three DBeaver screenshots on 2026-09-13 confirmed all expected project results: 
 
 [24_create_fact_macro_quarterly.sql](../sql/24_create_fact_macro_quarterly.sql) is confirmed in the project for step 6F: six fields, 53 bank quarters, 17 passing integrity checks and two full-record comparisons with zero differences. All 265 values are populated in the pinned snapshot. The three mean fields allow NULL when inputs are incomplete, and completeness checks flag that condition. See the [quarterly macro fact notes](fact_macro_quarterly.md).
 
-[25_validate_analysis_model.sql](../sql/25_validate_analysis_model.sql) is confirmed in the project for step 6G. Its six table-inventory rows, six intended dimension relationships and two combined trial joins all passed. Monthly and quarterly bank joins retained 356 and 212 rows respectively, with no unmatched rows or duplicate bank-period groups. The individual schema, period and value audits remain the evidence for each table's contents. See [model validation](model_validation.md) for the confirmed screenshots and [model rebuild](rebuild_analysis_model.md) for execution order. The next reporting stage will import these tables and configure and validate the Power BI model.
+[25_validate_analysis_model.sql](../sql/25_validate_analysis_model.sql) is confirmed in the project for step 6G. Its six table-inventory rows, six intended dimension relationships and two combined trial joins all passed. Monthly and quarterly bank joins retained 356 and 212 rows respectively, with no unmatched rows or duplicate bank-period groups. The individual schema, period and value audits remain the evidence for each table's contents. See [model validation](model_validation.md) for the confirmed screenshots and [model rebuild](rebuild_analysis_model.md) for execution order. The Power BI import, six relationships, seventeen measures and four report pages have since been accepted. See the [report rebuild guide](rebuild_power_bi.md) and [final review](final_review.md).

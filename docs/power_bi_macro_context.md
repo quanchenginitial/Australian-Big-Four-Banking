@@ -4,8 +4,7 @@ The third report page was accepted on 16 September 2026. It contains four
 validated national macro measures, two history charts, a month dropdown and
 source/coverage notes. The report author confirmed the endpoint, date-filter,
 missing-value and final save checks. [Capital & Liquidity](power_bi_capital_liquidity.md)
-was accepted on 17 September 2026. The final project release review remains
-in progress.
+was accepted on 17 September 2026. The [final review](final_review.md) was completed on 17 September 2026. See [Analysis findings](analysis_findings.md) for the descriptive results and their limits.
 
 ![Macro Context page](../reports/macro_context.png)
 
@@ -108,18 +107,19 @@ column. The DAX comparisons use an absolute tolerance of 0.0000000001 on
 numeric fractions and distinguish BLANK from zero. `FORMAT` is used only
 for readable query result columns, not the model measures themselves.
 
-| Measure | July 2026 card and history endpoint | June 2026 card |
-|---|---:|---:|
-| Cash Rate Target | 4.35% | 4.35% |
-| Interbank Cash Rate | 4.35% | 4.35% |
-| 3M Bank Bill Rate | 4.48% | 4.46% |
-| CPI YoY | 3.50% | 3.80% |
+| Measure | March 2019 rate-history start | July 2026 card and history endpoint | June 2026 card |
+|---|---:|---:|---:|
+| Cash Rate Target | 1.50% | 4.35% | 4.35% |
+| Interbank Cash Rate | 1.50% | 4.35% | 4.35% |
+| 3M Bank Bill Rate | 1.83% | 4.48% | 4.46% |
+| CPI YoY | Unavailable | 3.50% | 3.80% |
 
 For final page acceptance, hover the first rate observation for March 2019
 and the last for July 2026, checking its three values against the table.
 Check CPI's first point at April 2025, 2.40%, and its last at July 2026,
 3.50%. Source cells for the July rates are `Data!B697`, `C697` and `I697`;
-June rates are `B696`, `C696` and `I696`. The CPI checks use `Data1!K23`,
+June rates are `B696`, `C696` and `I696`; the March 2019 start is
+`B609`, `C609` and `I609`. The CPI checks use `Data1!K23`,
 `K37` and `K38`, with `K22` blank for March 2025.
 
 Select June 2026: cards must match the June column while both histories

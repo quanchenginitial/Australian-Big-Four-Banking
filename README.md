@@ -3,9 +3,33 @@
 An independent portfolio project using SQL and Power BI to analyse
 Australian Big Four banking data alongside interest rates and inflation.
 
+## Key findings
+
+The monthly snapshot ends in **July 2026**; capital and liquidity end in
+**2026 Q1**. Shares below refer to the selected four banks.
+
+- Combined resident assets were **AUD 4,209.35 bn**, up **5.86%** from
+  July 2025. WBC had the highest annual growth at **9.68%**; CBA held the
+  largest asset balance.
+- Housing represented **62.26%** of total loans. CBA led housing loans
+  and household deposits; NAB led non-financial business loans.
+- The aggregate loan-to-deposit ratio fell from **116.15%** in June to
+  **115.70%** in July as deposits grew faster than loans over that month.
+- At 2026 Q1, ANZ and WBC shared the highest CET1 ratio (**12.40%**),
+  CBA the highest mean LCR (**132.80%**), and NAB the highest NSFR (**115.70%**).
+- July monthly-average cash rates were **4.35%** and CPI annual inflation
+  was **3.50%**. These provide context; no causal effect on bank performance
+  has been estimated.
+
+Read the [analysis and source calculations](docs/analysis_findings.md) and
+[final review](docs/final_review.md). MADIS domestic balances and ADI
+highest-consolidation-level ratios retain different scopes. The report
+provides descriptive comparisons, not an overall bank rating.
+
 ## Status
 
-Work in progress. All six source workbooks have been imported. Selected measures
+The defined four-page portfolio snapshot is complete, with final source and
+documentation review on 2026-09-17. All six source workbooks have been imported. Selected measures
 from the two APRA sources, RBA F1.1, ABS monthly CPI Table 1 and quarterly CPI
 Table 17 have been audited and converted into typed staging tables. The final
 source, ABS quarterly CPI Table 18, retains all 396 audited series in a typed
@@ -17,8 +41,8 @@ and seventeen DAX measures are now validated. Overview was accepted on
 2026-09-15; Loans & Deposits and Macro Context followed on 2026-09-16,
 and Capital & Liquidity on 2026-09-17. All four pages have passed their
 numerical, interaction, history-endpoint and final save checks, including
-missing-value behavior for CPI and liquidity ratios. The final project
-release review remains in progress.
+missing-value behavior for CPI and liquidity ratios. The [final review](docs/final_review.md) records the evidence and remaining
+extensions. The full PBIX has not been independently rebuilt from scratch.
 The source-loading and transformation scripts have also passed independent
 DuckDB tests against the downloaded Excel snapshots.
 
@@ -137,7 +161,8 @@ Four Power BI pages and seventeen measures are complete. See the
 [Macro Context report](docs/power_bi_macro_context.md),
 [Capital & Liquidity report](docs/power_bi_capital_liquidity.md) and
 [Power BI rebuild guide](docs/rebuild_power_bi.md).
-Further interpretation of the results and the final release review remain in progress.
+Descriptive results are in [Analysis findings](docs/analysis_findings.md);
+validation coverage and limitations are in [Final review](docs/final_review.md).
 Table 18 expenditure detail remains a later extension with its own series grain.
 
 ## Power BI Overview
@@ -337,6 +362,9 @@ this SQL rebuild. Staging and facts are stored snapshots; an automatic refresh
 process has not yet been implemented.
 
 ## Documentation
+
+- [Analysis findings](docs/analysis_findings.md): six conclusions, calculation inputs and source locations.
+- [Final review](docs/final_review.md): validation evidence, documentation corrections and future extensions.
 
 - [Initial APRA audit](docs/apra_initial_audit.md): observed results, source references, definitions and audit scope.
 - [APRA staging table](docs/apra_staging.md): cleaning rules, data dictionary, observed validation results and execution notes.

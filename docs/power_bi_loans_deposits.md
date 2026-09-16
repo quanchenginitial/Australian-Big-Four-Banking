@@ -6,7 +6,7 @@ month/bank dropdowns and source/definition notes. The report author confirmed
 the final interaction, endpoint and save checks. [Macro Context](power_bi_macro_context.md)
 was also accepted on 16 September 2026, followed by
 [Capital & Liquidity](power_bi_capital_liquidity.md) on 17 September 2026.
-The final project release review remains in progress.
+The [final review](final_review.md) was completed on 17 September 2026. See [Analysis findings](analysis_findings.md) for the descriptive results and their limits.
 
 ![Loans and Deposits page](../reports/loans_deposits.png)
 

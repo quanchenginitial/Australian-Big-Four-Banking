@@ -30,7 +30,7 @@ Expect six PASS rows. Each `row_count` and `unique_keys` must equal `expected_ro
 
 Expect six PASS rows, with `fact_rows = joined_rows` at the pinned counts and `unmatched_rows = bad_parent_keys = 0`. LEFT JOINs retain missing references so they remain visible in the issue counts. Repeated parent keys increase joined rows when referenced. `bad_parent_keys` also checks the entire dimension for NULL or duplicate key groups, including unused keys that would not increase today's join counts. The existing bank dimension has no declared primary key, so this explicit check matters.
 
-These SQL queries validate data for the intended relationships; they neither declare database foreign keys nor configure Power BI relationships. The planned model uses the date dimension to filter all four facts and the bank dimension to filter the two bank facts. See the [analysis model plan](analysis_model_plan.md).
+These SQL queries validate data for the intended relationships; they neither declare database foreign keys nor configure Power BI relationships. The accepted Power BI model uses the date dimension to filter all four facts and the bank dimension to filter the two bank facts. See the [analysis model plan](analysis_model_plan.md).
 
 ## 3. Combined trial joins
 
@@ -43,11 +43,11 @@ Each bank fact is LEFT JOINed to the bank dimension, daily date dimension and ma
 
 `unmatched_rows` counts joined rows missing any bank, date or macro match. `duplicate_joined_keys` counts bank-period groups appearing more than once after all three joins. A matched monthly macro row with an unavailable CPI value is still a valid match; NULL measures are not missing date keys.
 
-The direct bank/macro join is a SQL diagnostic only. It repeats shared macro observations across the four banks, so its macro values must not be summed. Power BI will relate the facts independently through the date dimension; this test does not propose a direct fact-to-fact relationship or a combined exported fact table.
+The direct bank/macro join is a SQL diagnostic only. It repeats shared macro observations across the four banks, so its macro values must not be summed. Power BI relates the facts independently through the date dimension; this test does not propose a direct fact-to-fact relationship or a combined exported fact table.
 
 ## Acceptance scope
 
-Read all three outputs together: **6 + 6 + 2 PASS rows** are required. These checks supplement the earlier schema, calendar, source-completeness, missing-value-pattern and full-record reconciliations in scripts 19-24. They do not repeat those value audits, prove economic conclusions, or validate a Power BI model that has not yet been configured. Review the pinned counts when adopting another source snapshot. Table 18 expenditure detail remains a later reporting extension outside these six core objects.
+Read all three outputs together: **6 + 6 + 2 PASS rows** are required. These checks supplement the earlier schema, calendar, source-completeness, missing-value-pattern and full-record reconciliations in scripts 19-24. They do not repeat those value audits, prove economic conclusions, or independently validate Power BI settings. The accepted report has its own [model and visual checks](rebuild_power_bi.md). Review the pinned counts when adopting another source snapshot. Table 18 expenditure detail remains a later reporting extension outside these six core objects.
 
 ## Independent validation and project status
 
@@ -68,4 +68,4 @@ All changes were rolled back and the original three result sets were restored. S
 
 Three DBeaver screenshots on 2026-09-13 confirmed all expected results: the six-table inventory at 20:41:52, the six dimension relationships at 20:42:11, and both combined trial joins at 20:42:29. All 14 statuses were PASS. Inventory counts and unique-key counts were 4/5113/356/212/89/53, with no NULL keys. All six relationships preserved their fact row counts with no unmatched rows or bad parent keys. Combined queries retained 356 monthly and 212 quarterly bank rows, with no unmatched rows or duplicate bank-period groups. The project script matches the independently tested version.
 
-The SQL analysis model is now confirmed. The [model rebuild guide](rebuild_analysis_model.md) records the complete execution order and expected results. Power BI import, relationship configuration, measures and report validation remain subsequent work.
+The SQL analysis model is now confirmed. The [model rebuild guide](rebuild_analysis_model.md) records the complete execution order and expected results. Power BI import, six active relationships, seventeen measures and four report pages have since been accepted. See the [Power BI rebuild guide](rebuild_power_bi.md) and [final review](final_review.md).

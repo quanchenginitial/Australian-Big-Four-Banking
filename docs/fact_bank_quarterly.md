@@ -43,7 +43,7 @@ Capital balances are not summed across quarters. Published ratios should initial
 
 The composite primary key and quarter-end CHECK enforce at most one observation per bank/calendar quarter. Eleven fields are NOT NULL; the three liquidity ratios remain nullable. The source's positive populated values and exact missingness pattern are validation expectations for this snapshot, not universal database constraints for future sources.
 
-No database foreign keys are declared. The existing bank dimension has no declared primary key; section 6 verifies its row count, key uniqueness, required metadata, reference matches and agreement with staging. Both bank and date lookups are also checked for changes in fact row counts. These are query checks, separate from table constraints and later Power BI relationships.
+No database foreign keys are declared. The existing bank dimension has no declared primary key; section 6 verifies its row count, key uniqueness, required metadata, reference matches and agreement with staging. Both bank and date lookups are also checked for changes in fact row counts. These are query checks, separate from table constraints and the accepted Power BI relationships described in the [report rebuild guide](rebuild_power_bi.md).
 
 ## Execution and expected outputs
 

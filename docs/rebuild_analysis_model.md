@@ -1,6 +1,6 @@
 # Rebuild the SQL analysis model
 
-The completed SQL model contains the existing four-bank dimension, a daily date dimension and four facts at monthly and quarterly grains. All individual and integrated project checks were confirmed through DBeaver on 2026-09-13. This guide records how to reproduce those objects from the pinned source snapshots. Power BI import, relationships, DAX and report pages are a subsequent stage.
+The completed SQL model contains the existing four-bank dimension, a daily date dimension and four facts at monthly and quarterly grains. All individual and integrated project checks were confirmed through DBeaver on 2026-09-13. This guide records how to reproduce those objects from the pinned source snapshots. The subsequent Power BI stage is now complete; follow the [Power BI rebuild guide](rebuild_power_bi.md) after this SQL procedure. The [final review](final_review.md) distinguishes SQL testing from report acceptance.
 
 ## Prerequisites and source order
 

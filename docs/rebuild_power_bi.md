@@ -225,8 +225,9 @@ Each acceptance includes the author's explicit interaction and save confirmation
 
 The report's automated DAX checks, earlier visual screenshots and final manual
 interaction confirmation are the evidence for this checkpoint. Source SQL
-reconciliation remains documented separately. An independent full report
-rebuild and final project release review remain future work.
+reconciliation remains documented separately. The [final source/documentation review](final_review.md) is complete.
+An independent full report rebuild remains a future verification step; it is
+not implied by the current manual acceptance.
 
 References: [DAX query/model update workflow](https://learn.microsoft.com/en-us/power-bi/transform-model/dax-query-view),
 [numeric formats](https://learn.microsoft.com/en-us/power-bi/create-reports/desktop-custom-format-strings),
